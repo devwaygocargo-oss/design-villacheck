@@ -1,3 +1,4 @@
+import {phase2PublicReviewRecords} from './phase2-public-reviews.mjs';
 import {paidQrVisibility} from './phase2-paid-qr-visibility.mjs';
 import {assertWriteSession} from './write-session.mjs';
 import {publicOtpEmail,publicOtpPhone,normalizeProfileOtpPhone} from './role-otp-contacts.mjs';
@@ -65,7 +66,7 @@ export async function reviewsApi(db, user, req, path, url, body, config={}) {
     const villa = await reviewVilla(db, url.searchParams.get("qr") || "",config)
     if (!villa) fail(404, "ไม่พบที่พัก")
     return {
-      ...publicReviewPage((await read(db)).filter(r=>r.villaId===villa.id),url.searchParams),
+      ...publicReviewPage([...(await read(db)).filter(r=>r.villaId===villa.id),...await phase2PublicReviewRecords(db,villa.id,config)],url.searchParams),
       policy: publicationPolicy,
       moderationRequired: await requiresModeration(db,villa),
     }
