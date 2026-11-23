@@ -35,7 +35,7 @@ export type Page = "admin-audit-log" | "user-membership" | "owner-membership" | 
   | "owner-pending" | "owner-analytics" | "owner-reports" | "owner-package"
   | "user-profile" | "user-dashboard" | "user-checks" | "user-check-detail" | "user-reports"
   | "user-report-detail" | "user-precheck" | "user-check-success" | "villa-report" | "villa-report-success"
-  | "admin-dashboard" | "admin-owners" | "admin-villas"
+  | "admin-tickets" | "admin-dashboard" | "admin-owners" | "admin-villas"
   | "admin-advertising" | "admin-reviews" | "admin-owner-verification" | "admin-leads" | "admin-settings" | "admin-payments" | "admin-subscriptions" | "admin-checks" | "admin-reports" | "admin-qr" | "admin-packages";
 
 type Go = (page: Page, item?: string) => void;
@@ -241,7 +241,7 @@ const ownerNav: [string, Page][] = [
 const adminNav: [string, Page][] = [
   ["ประวัติการอนุมัติ", "admin-audit-log"],
   ["สมาชิกและ Trial", "admin-membership"], ["CMS เว็บไซต์", "admin-cms"], ["Dashboard", "admin-dashboard"], ["Villa รออนุมัติ", "admin-pending-villas"], ["Villa ที่อนุมัติแล้ว", "admin-approved-villas"], ["ที่พัก Archived", "admin-archived-villas"], ["Users", "admin-users"], ["Merchants", "admin-owners"],
-  ["ประวัติตรวจสอบ", "admin-checks"], ["รายงานปัญหา", "admin-reports"], ["ทะเบียน QR", "admin-qr"], ["แพ็กเกจ / โปรโมชั่น", "admin-packages"], ["รีวิวลูกค้า", "admin-reviews"], ["ตรวจการชำระเงิน", "admin-payments"], ["บัญชีรับเงิน", "admin-receiving-bank"], ["Leads", "admin-leads"], ["Settings", "admin-settings"],
+  ["ประวัติตรวจสอบ", "admin-checks"], ["รายงานปัญหา", "admin-reports"], ["Tickets / คำร้องช่วยเหลือ", "admin-tickets"], ["ทะเบียน QR", "admin-qr"], ["แพ็กเกจ / โปรโมชั่น", "admin-packages"], ["รีวิวลูกค้า", "admin-reviews"], ["ตรวจการชำระเงิน", "admin-payments"], ["บัญชีรับเงิน", "admin-receiving-bank"], ["Leads", "admin-leads"], ["Settings", "admin-settings"],
 ];
 const userNav: [string, Page][] = [
   ["แพ็กเกจสมาชิก", "user-membership"], ["ภาพรวม", "user-dashboard"], ["ประวัติตรวจสอบ", "user-checks"], ["รายงานของฉัน", "user-reports"], ["ข้อมูลบัญชี", "user-profile"],

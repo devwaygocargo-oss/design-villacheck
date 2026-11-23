@@ -47,6 +47,7 @@ const exact=new Set([
   "/api/admin/social-jobs",
   "/api/admin/social-materials",
   "/api/admin/subscriptions",
+  "/api/admin/tickets",
   "/api/admin/users",
   "/api/admin/villa-archive",
   "/api/admin/villa-pages",
@@ -210,7 +211,7 @@ const patterns=[
     "flags": ""
   },
   {
-    "pattern": "^\\/api\\/(user\\/(?:checks|profile|summary)|reports|merchant\\/(analytics|reports|villas)|admin\\/(checks|reports|merchants|qr))",
+    "pattern": "^\\/api\\/(user\\/(?:checks|profile|summary)|reports|merchant\\/(analytics|reports|villas)|admin\\/(checks|reports|tickets|merchants|qr))",
     "flags": ""
   },
   {
@@ -263,6 +264,10 @@ const patterns=[
   },
   {
     "pattern": "^\\/api\\/admin\\/(receiving-bank|change-approvals)(?:\\/|$)",
+    "flags": ""
+  },
+  {
+    "pattern": "^\\/api\\/admin\\/(reports|tickets)\\/([a-f0-9-]+)$",
     "flags": ""
   },
   {

@@ -673,7 +673,7 @@ function AppContent() {
     ["admin-users","admin-owners"].includes(page) ? <AdminAccounts role={page === "admin-users" ? "user" : "merchant"} go={go}/> :
     page === "user-profile" ? <UserProfile go={go}/> :
     page === "user-precheck" ? <RegistryPrecheck go={go} item={selectedItem}/> :
-    ["admin-owners","admin-checks","admin-reports","admin-qr","owner-analytics","owner-reports"].includes(page) || page.startsWith("user-") ? <OperationsPortal page={page} go={go} item={selectedItem} /> :
+    ["admin-tickets","admin-owners","admin-checks","admin-reports","admin-qr","owner-analytics","owner-reports"].includes(page) || page.startsWith("user-") ? <OperationsPortal page={page} go={go} item={selectedItem} /> :
     page === "login" ? <LoginPage reference={selectedItem} go={go} onAuthenticated={role => setUserLoggedIn(role === "User")} /> :
     page === "owner-auth" ? <OwnerPackageAuth go={go} packageName={selectedPackage} onOwnerLogin={() => {}} /> :
     page === "owner-information" || page === "owner-profile" ? <MerchantProfile page={page} go={go} /> :

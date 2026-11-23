@@ -44,7 +44,7 @@ export async function recordEvent(db,qr,kind,{eventId,viewer,trustOptions}={}){
  return {ok:true}
 }
 export async function operations(db,user,req,path,url,readBody,config,{validateDocument,insertDocument}={}){
- if(!/^\/api\/(user\/(?:checks|profile|summary)|reports|merchant\/(analytics|reports|villas)|admin\/(checks|reports|merchants|qr))/.test(path))return undefined
+ if(!/^\/api\/(user\/(?:checks|profile|summary)|reports|merchant\/(analytics|reports|villas)|admin\/(checks|reports|tickets|merchants|qr))/.test(path))return undefined
  const admin=user.role==='admin',merchant=user.role==='merchant'
  if(path.startsWith('/api/admin/')&&!admin)error(403,'เฉพาะ Admin')
  if(path.startsWith('/api/merchant/')&&!merchant)error(403,'เฉพาะ Merchant')
@@ -135,18 +135,19 @@ export async function operations(db,user,req,path,url,readBody,config,{validateD
 
   return {...(!admin&&req.stagingReadScope?{checkableVillaIds:req.stagingReadScope.villaIds}:{}),checks:admin?await db.prepare('SELECT c.*,u.name AS user_name FROM user_checks c JOIN users u ON u.id=c.user_id ORDER BY c.created DESC LIMIT 500').all():await db.prepare('SELECT * FROM user_checks WHERE user_id=? ORDER BY created DESC LIMIT 500').all(user.id)}
  }
- if(['/api/reports','/api/merchant/reports','/api/admin/reports'].includes(path)&&req.method==='GET'){
+ if(['/api/reports','/api/merchant/reports','/api/admin/reports','/api/admin/tickets'].includes(path)&&req.method==='GET'){
   if(!admin&&!merchant&&user.role!=='user')error(403,'ไม่มีสิทธิ์')
   let rows=admin&&req.stagingReadScope?(!req.stagingReadScope.userIds.length||!req.stagingReadScope.villaIds.length?[]:await db.prepare('SELECT * FROM support_reports WHERE user_id IN ('+req.stagingReadScope.userIds.map(()=>'?').join(',')+') AND villa_id IN ('+req.stagingReadScope.villaIds.map(()=>'?').join(',')+') ORDER BY created DESC LIMIT 500').all(...req.stagingReadScope.userIds,...req.stagingReadScope.villaIds)):admin?await db.prepare('SELECT * FROM support_reports ORDER BY created DESC LIMIT 500').all():merchant?await db.prepare('SELECT r.* FROM support_reports r JOIN villas v ON v.id=r.villa_id WHERE v.owner_id=? ORDER BY r.created DESC LIMIT 500').all(user.id):await db.prepare('SELECT * FROM support_reports WHERE user_id=? ORDER BY created DESC LIMIT 500').all(user.id)
   if(admin)rows=await Promise.all(rows.map(async r=>({...r,reporterStatus:r.user_id?'AUTHENTICATED':'ANONYMOUS',reporterAccount:r.user_id?await db.prepare('SELECT id,name,email,role FROM users WHERE id=?').get(r.user_id)||null:null})));
   rows=rows.map(r=>{if(admin)return r;const {admin_note,reporter,contact,user_id,...safe}=r;return safe})
-  return {reports:rows}
+  return path==='/api/admin/tickets'?{tickets:rows}:{reports:rows}
  }
- const report=path.match(/^\/api\/admin\/reports\/([a-f0-9-]+)$/)
+ const report=path.match(/^\/api\/admin\/(reports|tickets)\/([a-f0-9-]+)$/)
  if(report&&['POST','PATCH'].includes(req.method)){
-  const data=await readBody(req);if(!['NEW','UNDER_REVIEW','RESOLVED','REJECTED'].includes(data.status))error(400,'สถานะไม่ถูกต้อง')
-  const row=await db.prepare('SELECT id FROM support_reports WHERE id=?').get(report[1]);if(!row)error(404,'ไม่พบ Report')
-  await db.transaction(async()=>{await assertWriteSession(db,user);await db.prepare('UPDATE support_reports SET status=?,admin_note=?,public_note=?,updated=? WHERE id=?').run(data.status,clean(data.adminNote||'','บันทึกภายใน',4000,false),clean(data.publicNote||'','คำตอบผู้แจ้ง',4000,false),new Date().toISOString(),row.id);await audit(db,user,'report.'+data.status,row.id)})
+  const data=await readBody(req),ticket=report[1]==='tickets';if(ticket&&Object.keys(data).some(k=>!['status','adminNote','publicNote'].includes(k)))error(400,'Ticket fields invalid');if(!['NEW','UNDER_REVIEW','RESOLVED','REJECTED'].includes(data.status))error(400,'สถานะไม่ถูกต้อง')
+  const row=await db.prepare('SELECT id FROM support_reports WHERE id=?').get(report[2]);if(!row)error(404,'ไม่พบ Report')
+  const adminNote=ticket&&data.adminNote===undefined?null:clean(ticket?data.adminNote:data.adminNote||'','บันทึกภายใน',4000,false),publicNote=ticket&&data.publicNote===undefined?null:clean(ticket?data.publicNote:data.publicNote||'','คำตอบผู้แจ้ง',4000,false);
+  await db.transaction(async()=>{await assertWriteSession(db,user);const updated=await db.prepare('UPDATE support_reports SET status=?,admin_note=COALESCE(?,admin_note),public_note=COALESCE(?,public_note),updated=? WHERE id=?').run(data.status,adminNote,publicNote,new Date().toISOString(),row.id);if(ticket&&updated.changes!==1)error(404,'ไม่พบ Ticket');await audit(db,user,(ticket?'ticket.':'report.')+data.status,row.id)})
   return {ok:true}
  }
  if(path==='/api/merchant/analytics'&&req.method==='GET'){
