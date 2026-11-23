@@ -1,4 +1,4 @@
-import {phase2PublicReviewRecords} from './phase2-public-reviews.mjs';
+import {phase2PublicReviewRecords,phase2PublicReviewPolicy,hasPhase2Review} from './phase2-public-reviews.mjs';
 import {paidQrVisibility} from './phase2-paid-qr-visibility.mjs';
 import {assertWriteSession} from './write-session.mjs';
 import {publicOtpEmail,publicOtpPhone,normalizeProfileOtpPhone} from './role-otp-contacts.mjs';
@@ -57,7 +57,14 @@ export async function reviewsApi(db, user, req, path, url, body, config={}) {
   const disabled=['PHASE1','PHASE1_PUBLIC'].includes(config.productionReleaseMode)||config.reviewAccessMode!=='ENABLED';
   if(disabled){
     if(!['GET','HEAD'].includes(req.method))fail(503,'Reviews are temporarily disabled in Phase 1');
-    if(path==='/api/public/reviews')return {...publicReviewPage([],url.searchParams),deferred:true,policy:'PHASE1_DISABLED'};
+    if(path==='/api/public/reviews'){
+      const phase2Policy=await phase2PublicReviewPolicy(db,config);
+      if(!phase2Policy)return {...publicReviewPage([],url.searchParams),deferred:true,policy:'PHASE1_DISABLED'};
+      const villa=await reviewVilla(db,url.searchParams.get('qr')||'',config);
+      if(!villa)fail(404,'ไม่พบที่พัก');
+      const mode=await db.prepare('SELECT value FROM system_settings WHERE key=?').get('phase2:v1:review-mode:'+villa.id);
+      return {...publicReviewPage(await phase2PublicReviewRecords(db,villa.id,config,phase2Policy),url.searchParams),deferred:false,phase2Only:true,policy:publicationPolicy,moderationRequired:!(phase2Policy.allowImmediateReviews&&mode&&JSON.parse(mode.value).mode==='immediate')};
+    }
     if(path==='/api/reviews'&&user?.role==='user')return {reviews:(await read(db)).filter(r=>r.userId===user.id),canReview:false,verificationRequired:false,deferred:true};
     if(path==='/api/admin/reviews'&&user?.role==='admin')return {reviews:await read(db),deferred:true};
     if(path==='/api/merchant/reviews'&&user?.role==='merchant')return {reviews:[],deferred:true};
@@ -118,7 +125,7 @@ export async function reviewsApi(db, user, req, path, url, body, config={}) {
       if (
         (await read(db)).some(
           (r) => r.userId === user.id && r.villaId === villa.id,
-        )
+        ) || await hasPhase2Review(db,user.id,villa.id)
       )
         fail(409, "คุณส่งรีวิวที่พักนี้แล้ว ดูสถานะหรือขอทบทวนผลในรีวิวของฉัน")
       const nowMs=Date.now(),limitKey="review_submit_limit:"+user.id;

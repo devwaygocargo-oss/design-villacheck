@@ -17,3 +17,10 @@ MAXIMUM_EVIDENCE_DIR=/absolute/private/evidence node qa-tests/phase2/run-maximum
 MAXIMUM_EVIDENCE_DIR=/absolute/private/evidence node qa-tests/phase2/run-maximum-e2e.mjs --review-browser
 
 The native journey submits1star as a fixture-verifiedUser, ordinaryAdmin publishes, ownMerchant replies, and a separate freshguest reads the actual main public QR page for all4packages at1440/390. API tests preserve legacy reviews, exclude pending/rejected/foreignVilla data and private identity, check combined summary/filter and disabled/publication flags. Fixtureverification is not an actual external OAuth-provider test. No Production reviews are created or activation settings changed.
+
+Production-core flag profile (still physical loopback PostgreSQL):
+
+MAXIMUM_EVIDENCE_DIR=/absolute/private/evidence node qa-tests/phase2/run-maximum-e2e.mjs --review-browser --production-profile
+node --test qa-tests/phase2/operational-review-guards.test.mjs
+
+The profile uses an explicit trusted database-identity facade, following existing production-core contract tests; the connector remains loopback and no Neon/Production connection is opened. It checks enabled operational review workflows and disabled-operation/policy controls, media capture independent of review policy, and financial UI closure. A separate strictPHASE1_PUBLIC/Production-runtime API contract test preserves legacy disabled state while projecting only business-approved Phase2 public records. These vectors are not actual Production acceptance or provider TEST. Legacy/Phase2 duplicate checks share existing PostgreSQL transaction serialization; concurrent submissions create one record and return409 for the other. Historical records are not rewritten or deleted.

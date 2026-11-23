@@ -14,7 +14,7 @@ try{
  const env={PATH:process.env.PATH,HOME:process.env.HOME,TMPDIR:process.env.TMPDIR,APP_ENV:'test',TEST_DATABASE_URL:`postgresql://postgres:${password}@127.0.0.1:${port}/postgres`,NEXT_TELEMETRY_DISABLED:'1',SEED_PUBLIC_DEMO_DATA:'false',SEED_DEMO_ACCOUNTS:'false'};
  for(const key of ['DATABASE_URL','DIRECT_URL','VillaCheck_DATABASE_URL','SMTP_HOST','SMTP_FROM','SMTP_USER','SMTP_PASSWORD','SMTP_PORT','SMTP_SECURE','OTP_SECRET','GOOGLE_CLIENT_ID','GOOGLE_CLIENT_SECRET','LINE_CHANNEL_ID','LINE_CHANNEL_SECRET','FACEBOOK_APP_ID','FACEBOOK_APP_SECRET','THAIBULKSMS_API_KEY','THAIBULKSMS_API_SECRET','THAIBULKSMS_SENDER','THAIBULKSMS_OTP_KEY','THAIBULKSMS_OTP_SECRET','OMISE_TEST_SECRET_KEY','OMISE_TEST_PUBLIC_KEY','CRON_SECRET'])env[key]='';
  if(process.env.UI_BUILD_DIR)env.UI_BUILD_DIR=process.env.UI_BUILD_DIR;
- env.MAXIMUM_EVIDENCE_DIR=process.env.MAXIMUM_EVIDENCE_DIR;
+ env.MAXIMUM_EVIDENCE_DIR=process.env.MAXIMUM_EVIDENCE_DIR;env.MAXIMUM_PRODUCTION_PROFILE=process.argv.includes('--production-profile')?'1':'0';
  const run=args=>new Promise((resolve,reject)=>{const child=spawn(process.execPath,args,{env,stdio:'inherit'});child.once('exit',c=>resolve(c??1));child.once('error',reject);});
  code=await run(process.argv.includes('--review-api')?['--test','qa-tests/phase2/public-review-bridge.test.mjs']:[process.argv.includes('--review-browser')?'qa-tests/phase2/public-review-bridge-browser.mjs':process.argv.includes('--cms')?'qa-tests/phase2/maximum-cms.mjs':'qa-tests/phase2/maximum-e2e.mjs']);
 }finally{await pg.stop().catch(()=>{});rmSync(dir,{recursive:true,force:true});}

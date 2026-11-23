@@ -17,6 +17,6 @@ export function phase2ProductionPolicy(env){
 // Existing nonfinancial workflows only; payment/order/settlement writes remain closed.
 export function phase2ProductionReadAllowed(method,path,config={}){
  if(config.phase2ProductionOwnerMode===true&&method==='POST'&&path==='/api/phase2/owner-session')return true;
- if(config.phase2ProductionOperationalManagement===true&&method==='POST'&&['policy','trial','escalations','promotions','social','media','review-mode','reviews'].some(p=>path==='/api/phase2/'+p))return true;
+ if(config.phase2ProductionOperationalManagement===true&&method==='POST'&&['policy','trial','escalations','promotions','social','media','review-mode','reviews','moderate','reply'].some(p=>path==='/api/phase2/'+p))return true;
  return ['GET','HEAD'].includes(method)&&['workspaces','owner-workspace','public','catalog','workspace','policy','orders','reviews','review-mode','media','escalations','social'].some(p=>path==='/api/phase2/'+p);
 }
