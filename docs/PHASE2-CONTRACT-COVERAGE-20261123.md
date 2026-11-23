@@ -1,0 +1,11 @@
+# Phase2 contractual coverage closure — 23 November 2026
+
+Runtime baseline remains2c0b088bf79c5f223f40d5a8ad44e90160ffd2a6 /dpl_9HzTyyv65bkf88EfGu9aBcwbhjgn. This branch adds focused QA reproduction only; no server/UI/schema/dependency/environment/runtime files changed. No new confirmed runtime defect was found in the executed missing-coverage cases; do not invent a feature change or redeploy simply to ship evidence.
+
+Company original S__34316300.pdf page2 was read visually. Latest decisions supersede prior expiry-day notice (7days only), public expiredQR continuity (hide until paid+company approval), inclusive quotes (newexclusive snapshots), and deferred paid start (approval+30elapsed days). P2-08 user explicitly clarified lookup of prior orders, not refunds. Original media dates are upload/capture/review; packageexpiry governs publicaccess without inventing file deletion.
+
+RunNode24: npm ci; npm run build; npm run lint; npm run typecheck. Newfocused QA: node qa-tests/phase2/run-contractual-closure.mjs (ephemeral loopback PG, no cloud credentials); node qa-tests/phase2/run-contractual-closure-browser.mjs --browser (requiresChrome plus npm --prefix tools/qa ci). API scope8newcases plus5selectedcurrent-sourceReviews/Media/Banner cases. Currentbrowser10flows coversCMSdraft and1starreviewmoderation in4plans at1440/390. No Production mutations/provider calls. These tests do not close actualfinancial/provider/session/expiryacceptance.
+
+Formal matrix74atomic requirements and11ThaiPDF/HTMLmanuals live in separate static handover package, linked by source reference/checksums. Original87/87,291tests and scopedcurrent22/Ticket6evidence are retained, not falsely rerun. Full Production Acceptance remains NOT PASS: Game/Prinpending, QRtransitiondeferred, ordinaryAdminnegativewriteactualsessionunverified, TicketProductionwritesnotexercised, providerTEST/Finance/notificationexternal acceptancepending. LivePayments/Settlement remainDISABLED.
+
+This local test-only commit is not published/deployed or covered by earlier exact-SHA deployment approval. Any later publication requires a reviewed exact-SHA authorization and care for linked branch auto-deployment. No historyrewrite,public/personal repo modification,grants,cleanup or Production data changes.
