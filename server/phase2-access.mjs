@@ -22,7 +22,7 @@ export async function assertPhase2VillaEditing(db,actor,villa,config){
 // Public continuity never changes internal entitlement/verification status.
 export async function phase2PublicContinuity(db,villa,config){
  if(!config?.phase2Enabled||config.publicPublicationDisabled||villa.status!=='approved'||!villa.qr)return false;
- const access=await phase2VillaAccess(db,villa,config);if(!access)return false;
+ const access=await phase2VillaAccess(db,villa,config);if(!access||access.state!=='ACTIVE'||access.publicQrVisible===false)return false;
  const row=await db.prepare('SELECT value FROM system_settings WHERE key=?').get('villa_approved:'+villa.id);let s;try{s=row&&JSON.parse(row.value)}catch{return false}
  return s?.villa?.id===villa.id&&s.villa.owner_id===villa.owner_id&&s.villa.status==='approved'&&Array.isArray(s.media);
 }

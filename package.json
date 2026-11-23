@@ -10,7 +10,7 @@
     "format": "oxfmt",
     "backend": "npm run build:backend && node --env-file-if-exists=.env .build/backend/main.js",
     "backend:dev": "npm run build:backend && node --watch --env-file-if-exists=.env .build/backend/main.js",
-    "test:backend": "node qa-tests/phase2/run.mjs --regression",
+    "test:backend": "node qa-tests/phase2/run-consolidated.mjs",
     "test:security": "node qa-tests/approval-hotfix/run.mjs --regression",
     "start": "next start --port 8443",
     "build:backend": "node tools/generate-api-route-manifest.mjs && node tools/build-backend.mjs",
@@ -25,7 +25,7 @@
     "db:restore": "node --env-file-if-exists=.env tools/application-backup.mjs restore",
     "check:health": "node tools/health-check.mjs",
     "demo:seed-public": "node tools/seed-public-demo.mjs",
-    "test:phase2": "node qa-tests/phase2/run.mjs --regression --fullstack --browser",
+    "test:phase2": "node qa-tests/phase2/run-consolidated.mjs && node qa-tests/phase2/run-consolidated-browser.mjs",
     "check:phase2-config": "node tools/phase2-preflight.mjs"
   },
   "dependencies": {

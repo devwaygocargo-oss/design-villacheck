@@ -97,6 +97,7 @@ const exact=new Set([
   "/api/phase2/catalog",
   "/api/phase2/company-approval-preview",
   "/api/phase2/company-approval-requests",
+  "/api/phase2/company-decisions",
   "/api/phase2/escalations",
   "/api/phase2/media",
   "/api/phase2/moderate",
@@ -245,7 +246,7 @@ const patterns=[
     "flags": ""
   },
   {
-    "pattern": "^\\/api\\/admin\\/(packages|package-promotions|package-entitlements|basic-promotion)(?:\\/|$)",
+    "pattern": "^\\/api\\/admin\\/(packages|package-promotions|basic-promotion)(?:\\/|$)",
     "flags": ""
   },
   {
@@ -318,6 +319,10 @@ const patterns=[
   },
   {
     "pattern": "^\\/api\\/admin\\/merchant-registrations\\/[a-f0-9-]{36}$",
+    "flags": ""
+  },
+  {
+    "pattern": "^\\/api\\/admin\\/package-entitlements(?:\\/|$)",
     "flags": ""
   },
   {

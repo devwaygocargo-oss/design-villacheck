@@ -10,7 +10,7 @@ export default function VillaEntitlements({villa,plan,error,go}:{villa:MerchantV
  return <section className="villa-entitlements" aria-label={uiText(`สิทธิ์รายที่พัก ${villa.name}`)} data-package-id={villa.packageId}>
   <h3>{uiText("สิทธิ์แพ็กเกจของที่พักนี้")}</h3><VillaTrialInfo trial={villa.freeTrial}/>
   <dl className="subscription-detail-grid">
-   <div><dt>{uiText("แพ็กเกจปัจจุบัน")}</dt><dd>{villa.package}{plan&&!villa.freeTrial&&<small>{uiText("฿")}{(plan.amount/100).toLocaleString(localeTag())} / {billingLabel(plan.billingCycle)}{uiText(" / ที่พัก · รวมภาษี")}</small>}</dd></div>
+   <div><dt>{uiText("แพ็กเกจปัจจุบัน")}</dt><dd>{villa.package}{plan&&!villa.freeTrial&&<small>{uiText("฿")}{(plan.amount/100).toLocaleString(localeTag())} / {billingLabel(plan.billingCycle)}{uiText(" / ที่พัก · ยังไม่รวม VAT")}</small>}</dd></div>
    <div><dt>{uiText("สถานะ QR")}</dt><dd><span className={`subscription-status status-${villa.qrStatus.toLowerCase()}`}>{qrLabels[villa.qrStatus]||villa.qrStatus}</span></dd></div>
    <div><dt>{uiText("วันหมดอายุ")}</dt><dd>{villa.trialUnlimited?uiText("Basic Verify · ยังไม่มีวันสิ้นสุดที่ยืนยัน"):villa.expires?new Date(villa.expires).toLocaleDateString(localeTag(),{day:"numeric",month:"short",year:"numeric",timeZone:"Asia/Bangkok"}):uiText("ยังไม่เปิดสิทธิ์")}</dd></div>
    <div><dt>{uiText("การชำระเงิน")}</dt><dd>{villa.paymentPending?uiText("มีรายการรอชำระ / ตรวจสลิป"):uiText("ไม่มีรายการรอชำระ")}</dd></div>

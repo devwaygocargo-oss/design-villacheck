@@ -1,8 +1,9 @@
+import {requireBusinessPermission,withPermissionContext} from './business-permissions.mjs';
 import {approvedReviewAuthority,decisionAudit} from './decision-audit.mjs';
 import {approvalReviewDigest,companyApprovalPreview} from './phase2-company-approval.mjs';
-import {gameResponsesEnabled,gameResponsePolicy,gameResponseReference} from './phase2-game-responses.mjs';
+import {gameResponsesEnabled} from './phase2-game-responses.mjs';
 import {paidQrVisibility} from './phase2-paid-qr-visibility.mjs';
-import {latestDecisionsEnabled,downgradedVideoRestriction,publicPackageVideoAllowed,companySocialSummary} from './phase2-latest-decisions.mjs';
+import {downgradedVideoRestriction,publicPackageVideoAllowed,companySocialSummary} from './phase2-latest-decisions.mjs';
 import {ownerQaReadAuthorized} from './phase2-owner-qa-readonly.mjs';
 import {grantEnvironment} from './phase2-grants.mjs';
 import {publicRevision} from './public-revision.mjs';
@@ -29,7 +30,7 @@ const instant=v=>{if(typeof v!=='string'||!Number.isFinite(Date.parse(v))||new D
 const read=async(db,k,f=null)=>{const r=await db.prepare('SELECT value FROM system_settings WHERE key=?').get(prefix+k);return r?JSON.parse(r.value):f;};
 const put=(db,k,v)=>db.prepare('INSERT INTO system_settings(key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value').run(prefix+k,JSON.stringify(v));
 const rows=async(db,type)=>(await db.prepare('SELECT value FROM system_settings WHERE key LIKE ? ORDER BY key').all(prefix+type+':%')).map(r=>JSON.parse(r.value));
-const policy=async db=>effectiveReminderPolicy({...phase2Defaults,...await read(db,'policy',{})});
+const policy=async db=>effectiveReminderPolicy({...phase2Defaults,...await read(db,'policy',{}),billingUnit:'VILLA',billingDays:30,monthlyBoundary:'EXPLICIT_ELAPSED_DAYS',vatMode:'EXCLUSIVE',paidStartRule:'COMPANY_APPROVAL',premiumChannels:['facebook']});
 function fields(data,allowed){if(!data||typeof data!=='object'||Array.isArray(data)||Object.keys(data).some(k=>!allowed.includes(k)))fail(400,'Unexpected request fields / ข้อมูลเกินขอบเขต');}
 async function principal(db,a,c){
  const u=await db.prepare('SELECT id,role,email,name FROM users WHERE id=?').get(a?.id||'');
@@ -53,7 +54,7 @@ async function verified(db,a){
   if(!d)continue;const key='role_otp_contact:'+u.role+':'+channel+':'+createHash('sha256').update(d).digest('hex'),r=await db.prepare('SELECT value FROM system_settings WHERE key=?').get(key);let p;try{p=r&&JSON.parse(r.value);}catch{continue;}if(p?.userId===u.id&&p.role===u.role&&p.destination===d&&p.channel===channel&&Number.isFinite(Date.parse(p.verifiedAt)))return true;
  }return false;
 }
-const quote=(plan,p)=>monthlyQuote(plan,phase2Prices,p);
+const quote=async(db,plan,p)=>{const row=await db.prepare('SELECT amount,active FROM package_catalog WHERE id=?').get(plan);if(!row||!row.active)fail(409,'Package unavailable');return monthlyQuote(plan,{...phase2Prices,[plan]:Number(row.amount)},p);};
 async function docsComplete(db,v){
  const r=await db.prepare('SELECT value FROM system_settings WHERE key=?').get('ownership_documents:'+v.id);let p;try{p=r&&JSON.parse(r.value);}catch{return false;}
  const ds=p?.documents?.filter(d=>!d.removedAt&&!d.supersededAt)||[];if(!ds.length||v.status!=='approved'||!Number.isFinite(Date.parse(v.reviewed_at))||!Number.isFinite(Date.parse(v.created)))return false;const approver=await db.prepare('SELECT id,role FROM users WHERE id=?').get(v.reviewed_by||'');if(!await approvedReviewAuthority(db,approver,v.id,v.reviewed_at,'VILLA_REVIEW'))return false;
@@ -70,17 +71,8 @@ export async function settlePhase2Sandbox(db,a,config,envelope,now=new Date().to
   const previousPaymentStatus=order.status;
   if(order.status!=='pending'&&e.status!==order.status)fail(409,'Terminal order cannot change');
   const v=await villa(db,actor,order.villaId,!actor);if(v.owner_id!==order.userId)fail(409,'Ownership changed');
-  if(e.status==='succeeded'&&!order.grantId){
-   assertPhase2OrderTerms(order);
-   const candidateTrial=await read(db,'account-trial:'+v.owner_id)||await read(db,'trial:'+v.id);
-   const trial=candidateTrial?.userId===v.owner_id?candidateTrial:null;
-   const billingStart=new Date(Math.max(instant(now),...(trial?[instant(trial.endsAt)]:[]))).toISOString();
-   const id=randomUUID(),grant={id,villaId:v.id,userId:v.owner_id,packageId:order.packageId,startsAt:now,billingStartsAt:billingStart,endsAt:new Date(instant(billingStart)+order.billingDays*DAY).toISOString(),source:'SANDBOX_ORDER',scope:'VILLA',orderId:order.id,environment:'SANDBOX',createdAt:now,financialAdjustment:order.switchingPolicy?.version===1?'NONE_APPROVED_NO_REFUND_CARRYOVER_PRORATION':'NOT_APPLIED_POLICY_PENDING',...(order.switchingPolicy?{switchingPolicy:structuredClone(order.switchingPolicy)}:{})};
-   if(await latestDecisionsEnabled(db,config)){const restriction=downgradedVideoRestriction(await selectedPhase2GrantRecord(db,v,instant(now)),order.packageId,await policy(db));if(restriction)grant.videoRestriction=restriction;}
-   await put(db,'grant:'+id,grant);order.grantId=id;
-   await put(db,'selection:'+v.id,{villaId:v.id,userId:v.owner_id,grantId:id,orderId:order.id,selectedAt:now,reason:'CONFIRMED_SUCCESSFUL_PAYMENT'});
-  }
-  if(previousPaymentStatus!==e.status&&['succeeded','failed','cancelled'].includes(e.status))await decisionAudit(db,a,{kind:'PAYMENT',resourceType:'SANDBOX_ORDER',targetId:order.id,outcome:e.status==='succeeded'?'APPROVED':'REJECTED',previousStatus:previousPaymentStatus,newStatus:e.status,action:'sandbox.payment.'+e.status,providerEvent:{provider:config.phase2SandboxGateway.provider,eventId:e.eventId}});
+  // Verified payment alone never creates entitlement; an authorized company decision is still required.
+  if(previousPaymentStatus!==e.status&&['succeeded','failed','cancelled'].includes(e.status))await decisionAudit(db,a?withPermissionContext(a,config,'payments.review',(await requireBusinessPermission(db,a,config,'payments.review')).owner):null,{kind:'PAYMENT',resourceType:'SANDBOX_ORDER',targetId:order.id,outcome:e.status==='succeeded'?'APPROVED':'REJECTED',previousStatus:previousPaymentStatus,newStatus:e.status,action:'sandbox.payment.'+e.status,providerEvent:{provider:config.phase2SandboxGateway.provider,eventId:e.eventId}});
   order.status=e.status;order.updatedAt=now;await put(db,'order:'+order.id,order);await put(db,'event:'+e.eventId,{id:e.eventId,sequence:(await rows(db,'event')).filter(row=>row.orderId===order.id).length+1,fingerprint:sha(e),orderId:order.id,at:now,status:e.status,amountSatang:e.amount,currency:e.currency,providerReference:e.providerReference});if(a)await audit(db,a,'phase2.sandbox.'+e.status,order.id);else await put(db,'provider-audit:'+e.eventId,{provider:'OMISE_TEST',orderId:order.id,status:e.status,at:now});if(e.status==='succeeded')await syncPhase2Reminders(db,await policy(db),instant(now),v.owner_id);return {order,duplicate:false};
  });
 }
@@ -88,7 +80,8 @@ export async function phase2Api(db,actor,req,path,url,body,config){
  requirePhase2(config);requirePhase2Database(db,config);if(config.phase2ProductionCoreOnly&&!phase2ProductionReadAllowed(req.method,path,config))fail(503,'รอการอนุมัติที่เกี่ยวข้อง / Phase2 activation, payments, policy and publication writes remain disabled');const nowMs=config.phase2Clock?config.phase2Clock():Date.now(),now=new Date(nowMs).toISOString();
  const write=req.method==='POST';if(!['GET','POST'].includes(req.method))fail(405,'Method not allowed');const parsedBody=write?await body(req):null;
  const work=async()=>{
-  const a=actor?await principal(db,actor,config):null,responseCandidate=await gameResponsesEnabled(db,config),approvedResponseView=responseCandidate||config.phase2ProductionOwnerMode===true,storedPolicy=await policy(db),p=approvedResponseView?gameResponsePolicy(storedPolicy):storedPolicy;if(write){if(!a)fail(401,'Login required');await assertWriteSession(db,actor);}
+  const a=actor?await principal(db,actor,config):null,responseCandidate=await gameResponsesEnabled(db,config),p=await policy(db);if(write){if(!a)fail(401,'Login required');await assertWriteSession(db,actor);}
+  if(a?.admin){const permissions={policy:'subscriptions.configure',trial:'memberships.manage',notices:'memberships.manage',promotions:'content.manage',social:'content.manage',media:'content.manage',sandbox:'payments.review','company-decisions':'payments.review'};const permission=permissions[path.split('/').at(-1)];if(permission&&(write||permission!=='subscriptions.configure'))await requireBusinessPermission(db,actor,config,permission);}
   if(responseCandidate&&write&&['orders','payment','sandbox','policy','promotions'].some(resource=>path==='/api/phase2/'+resource))fail(503,'Game responses recorded; financial/policy activation and new Banner remain disabled');
   if(responseCandidate&&write&&path==='/api/phase2/notices'&&parsedBody?.action==='deliver')fail(503,'External reminder acceptance pending');
   if(path==='/api/phase2/public'){
@@ -113,13 +106,34 @@ export async function phase2Api(db,actor,req,path,url,body,config){
   if(path==='/api/phase2/policy'){
    if(!write){if(!a.admin&&!a.businessOwner)fail(403,'Owner or Admin read required');return {policy:p,canDecide:a.businessOwner};}owner(a);fields(data,['policy','reason']);text(data.reason,120);const n=validatePhase2Policy(data.policy);if(n.revision!==p.revision)fail(409,'Policy changed');n.revision++;await put(db,'policy',n);await put(db,'policy-change:'+randomUUID(),{revision:n.revision,actorId:a.id,at:now,reason:data.reason,beforeSha256:sha(p),policy:n});await audit(db,actor,'phase2.policy.updated',n.approvalReference);return {policy:n};
   }
-  if(path==='/api/phase2/catalog')return {packages:Object.entries(phase2Prices).map(([id,amount])=>({id,amountSatang:amount,currency:'THB',billingCycle:'MONTHLY',billingDays:p.billingDays,vatMode:p.vatMode,vatRateConfirmed:p.vatBasisPoints!==null,capabilities:phase2Capabilities(id,p)})),...(approvedResponseView?{businessResponses:{reference:gameResponseReference,respondent:'Game',prinApproval:false,financeSignOff:false,screenshotVerified:false,packageDays:30,periodStart:'COMPANY_APPROVAL',renewal:'MANUAL',premiumChannels:['facebook'],bannerEnabled:false},financialActionsEnabled:false,newBannerEnabled:false}:{}),sandboxOnly:!config.phase2ProductionCoreOnly,productionCoreOnly:config.phase2ProductionCoreOnly===true,canAdmin:a.admin,canDecide:a.businessOwner,canBindOwner:a.canBindOwner,ownerCandidate:independentOwnerEnabled(config),canMerchant:a.merchant&&!asUser,canReview:a.user&&(asUser||!a.merchant),policyRevision:p.revision};
+  if(path==='/api/phase2/catalog')return {packages:(await Promise.all(Object.keys(phase2Prices).map(async id=>{const row=await db.prepare('SELECT amount FROM package_catalog WHERE id=?').get(id);return [id,Number(row?.amount??phase2Prices[id])]}))).map(([id,amount])=>({id,amountSatang:amount,currency:'THB',billingCycle:'MONTHLY',billingDays:p.billingDays,vatMode:p.vatMode,vatRateConfirmed:p.vatBasisPoints!==null,capabilities:phase2Capabilities(id,p)})),businessResponses:{reference:'CONSOLIDATED_GAME_20261123',respondent:'Game',packageDays:30,periodStart:'COMPANY_APPROVAL',renewal:'MANUAL',premiumChannels:['facebook'],bannerEnabled:true},financialActionsEnabled:!config.phase2ProductionCoreOnly,newBannerEnabled:!config.phase2ProductionCoreOnly,sandboxOnly:!config.phase2ProductionCoreOnly,productionCoreOnly:config.phase2ProductionCoreOnly===true,canAdmin:a.admin,canDecide:a.businessOwner,canBindOwner:a.canBindOwner,ownerCandidate:independentOwnerEnabled(config),canMerchant:a.merchant&&!asUser,canReview:a.user&&(asUser||!a.merchant),policyRevision:p.revision};
   if(path==='/api/phase2/workspace'){
    if(write)fail(405,'Read only');const vs=a.admin?await db.prepare('SELECT id,name,owner_id,status,qr,package_id FROM villas ORDER BY id').all():a.merchant&&!asUser?await db.prepare('SELECT id,name,owner_id,status,qr,package_id FROM villas WHERE owner_id=? ORDER BY id').all(a.id):(await db.prepare("SELECT id,name,status,owner_id FROM villas WHERE status='approved' ORDER BY id").all()).map(({owner_id,...v})=>({...v,isOwn:owner_id===a.id}));
-   const all=await rows(db,'grant');const companySocial=await latestDecisionsEnabled(db,config)&&(a.admin||a.merchant&&!asUser)?await companySocialSummary(db,vs,config,p,nowMs):null;return {...(companySocial?{companySocial}:{}),serverNow:now,villas:vs,packageRights:await Promise.all(vs.filter(v=>a.admin||v.owner_id===a.id).map(async v=>({villaId:v.id,...await villaPackageRights(db,v,config,nowMs)}))),grants:all.filter(g=>a.admin||g.userId===a.id).map(g=>({...g,state:state(g,nowMs),appliesToVillaIds:vs.filter(v=>g.scope==='MERCHANT_ACCOUNT'?(v.owner_id===g.userId||v.isOwn&&g.userId===a.id):g.villaId===v.id).map(v=>v.id)})),notices:(await currentPhase2Notices(db,p,nowMs)).filter(n=>a.admin||n.userId===a.id),orders:(await rows(db,'order')).filter(o=>a.admin||o.userId===a.id),escalations:(await rows(db,'escalation')).filter(e=>a.admin||a.businessOwner||e.submittedBy===a.id)};
+   const all=await rows(db,'grant');const companySocial=(a.admin||a.merchant&&!asUser)?await companySocialSummary(db,vs,config,p,nowMs):null;return {...(companySocial?{companySocial}:{}),serverNow:now,villas:vs,packageRights:await Promise.all(vs.filter(v=>a.admin||v.owner_id===a.id).map(async v=>({villaId:v.id,...await villaPackageRights(db,v,config,nowMs)}))),grants:all.filter(g=>a.admin||g.userId===a.id).map(g=>({...g,state:state(g,nowMs),appliesToVillaIds:vs.filter(v=>g.scope==='MERCHANT_ACCOUNT'?(v.owner_id===g.userId||v.isOwn&&g.userId===a.id):g.villaId===v.id).map(v=>v.id)})),notices:(await currentPhase2Notices(db,p,nowMs)).filter(n=>a.admin||n.userId===a.id),orders:(await rows(db,'order')).filter(o=>a.admin||o.userId===a.id),escalations:(await rows(db,'escalation')).filter(e=>a.admin||a.businessOwner||e.submittedBy===a.id)};
+  }
+  if(path==='/api/phase2/company-decisions'){
+   if(!write)fail(405,'POST required');admin(a);const decisionAccess=await requireBusinessPermission(db,actor,config,'payments.review');
+   fields(data,['orderId','decision','revision','reason']);
+   if(!['APPROVED','REJECTED'].includes(data.decision))fail(400,'Invalid company decision');const reason=text(data.reason,500);
+   const order=await read(db,'order:'+data.orderId);if(!order)fail(404,'Order missing');
+   if(order.companyStatus===data.decision)return {order,duplicate:true};
+   if(order.companyStatus!=='PENDING_REVIEW'||order.companyRevision!==data.revision)fail(409,'Company decision changed');
+   const v=await villa(db,a,order.villaId);if(v.owner_id!==order.userId)fail(409,'Ownership changed');
+   assertPhase2OrderTerms(order);if(order.termsVersion!==2)fail(409,'Historical terms require separate Finance review');
+   if(data.decision==='APPROVED'){
+    if(order.status!=='succeeded'||order.grantId)fail(409,'Verified successful payment required');
+    const previous=await selectedPhase2GrantRecord(db,v,nowMs),id=randomUUID();
+    const grant={id,villaId:v.id,userId:v.owner_id,packageId:order.packageId,startsAt:now,billingStartsAt:now,endsAt:new Date(nowMs+30*DAY).toISOString(),source:'COMPANY_APPROVED_ORDER',scope:'VILLA',orderId:order.id,environment:grantEnvironment(db),createdAt:now,approvedBy:a.id,approvedAt:now,financialAdjustment:'NONE_APPROVED_NO_REFUND_CARRYOVER_PRORATION',switchingPolicy:structuredClone(order.switchingPolicy)};
+    const restriction=downgradedVideoRestriction(previous,order.packageId,p);if(restriction)grant.videoRestriction=restriction;
+    await put(db,'grant:'+id,grant);order.grantId=id;
+    await put(db,'selection:'+v.id,{villaId:v.id,userId:v.owner_id,grantId:id,orderId:order.id,selectedAt:now,reason:'PAYMENT_AND_COMPANY_APPROVAL'});
+   }
+   const previousStatus=order.companyStatus;Object.assign(order,{companyStatus:data.decision,companyRevision:order.companyRevision+1,companyDecidedBy:a.id,companyDecidedAt:now,updatedAt:now});
+   await put(db,'order:'+order.id,order);await decisionAudit(db,withPermissionContext(actor,config,'payments.review',decisionAccess.owner),{kind:'PAYMENT',resourceType:'PACKAGE_COMPANY_APPROVAL',targetId:order.id,outcome:data.decision,reason,previousStatus,newStatus:order.companyStatus,action:'phase2.company.'+data.decision.toLowerCase()});
+   await syncPhase2Reminders(db,p,nowMs,v.owner_id);return {order,duplicate:false};
   }
   if(path==='/api/phase2/company-approval-requests'||path==='/api/phase2/company-approval-preview'){
-   if(!responseCandidate)fail(503,'Company review preparation is isolated local acceptance only');
+   if(!responseCandidate)fail(503,'Legacy preview superseded; use company decisions for verified orders');
    const binding=async v=>approvalReviewDigest({villa:{id:v.id,ownerId:v.owner_id,status:v.status,qr:v.qr},selection:await read(db,'selection:'+v.id),policyRevision:p.revision});
    if(path==='/api/phase2/company-approval-preview'){
     if(!write)fail(405,'POST required');if(!a.admin)fail(403,'Existing Admin review access required');fields(data,['requestId']);
@@ -174,7 +188,7 @@ export async function phase2Api(db,actor,req,path,url,body,config){
    }
    fields(data,['villaId','packageId','requestKey']);if(!a.merchant)fail(403,'Merchant required');const v=await villa(db,a,data.villaId);if(v.owner_id!==a.id)fail(403,'Own Villa only');if(!await visible(db,v))fail(409,'Approved published Villa required');if(!config.phase2SandboxEnabled||!config.phase2SandboxGateway)fail(503,'Sandbox not configured');
    if(typeof data.requestKey!=='string'||!/^[a-f0-9-]{36}$/.test(data.requestKey))fail(400,'Idempotency key required');const k='request:'+a.id+':'+data.requestKey,fp=sha({villaId:v.id,packageId:data.packageId}),old=await read(db,k);if(old){if(old.fingerprint!==fp)fail(409,'Idempotency conflict');return {order:await read(db,'order:'+old.orderId),created:false};}
-   const q=quote(data.packageId,p),order={id:randomUUID(),userId:a.id,villaId:v.id,packageId:data.packageId,...q,status:'pending',environment:'SANDBOX',provider:config.phase2PaymentProvider||'LOCAL_SIMULATOR',providerReference:randomUUID(),createdAt:now,grantId:null};await put(db,'order:'+order.id,order);await put(db,k,{fingerprint:fp,orderId:order.id});await audit(db,actor,'phase2.sandbox.order',order.id);return {order,created:true};
+   const q=await quote(db,data.packageId,p),order={id:randomUUID(),userId:a.id,villaId:v.id,packageId:data.packageId,...q,status:'pending',companyStatus:'PENDING_REVIEW',companyRevision:0,environment:'SANDBOX',provider:config.phase2PaymentProvider||'LOCAL_SIMULATOR',providerReference:randomUUID(),createdAt:now,grantId:null};await put(db,'order:'+order.id,order);await put(db,k,{fingerprint:fp,orderId:order.id});await audit(db,actor,'phase2.sandbox.order',order.id);return {order,created:true};
   }
   if(path==='/api/phase2/payment'){
    if(!write)fail(405,'POST required');fields(data,['orderId','source','action']);if(!config.phase2PaymentService)fail(503,'Omise Sandbox not configured');
@@ -196,7 +210,7 @@ export async function phase2Api(db,actor,req,path,url,body,config){
    if(!['home','detail'].includes(data.placement)||!['TEAM','PACKAGE'].includes(data.source)||typeof data.approved!=='boolean'||instant(data.endsAt)<=instant(data.startsAt))fail(400,'Invalid promotion');const r={id:randomUUID(),villaId:v.id,placement:data.placement,source:data.source,startsAt:data.startsAt,endsAt:data.endsAt,approved:data.approved,image:v.photo_url,createdBy:a.id,createdAt:now};await put(db,'promotion:'+r.id,r);await audit(db,actor,'phase2.promotion.saved',r.id);return {promotion:r};
   }
   if(path==='/api/phase2/social'){
-   if(!write)return {jobs:(await rows(db,'social')).filter(j=>a.admin||j.ownerId===a.id)};admin(a);fields(data,['villaId','source','kind','channel','month','status','postUrl','publishedAt','jobId','revision']);const v=await villa(db,a,data.villaId);if(!await visible(db,v))fail(409,'Published Villa required');if(!['TEAM','PACKAGE'].includes(data.source)||!['image','video'].includes(data.kind)||!['facebook','instagram','tiktok'].includes(data.channel)||!['scheduled','published'].includes(data.status)||!/^\d{4}-(0[1-9]|1[0-2])$/.test(data.month))fail(400,'Invalid social job');
+   if(!write)return {jobs:(await rows(db,'social')).filter(j=>a.admin||j.ownerId===a.id)};admin(a);fields(data,['villaId','source','kind','channel','month','status','postUrl','publishedAt','jobId','revision']);const v=await villa(db,a,data.villaId);if(!await visible(db,v))fail(409,'Published Villa required');if(!['TEAM','PACKAGE'].includes(data.source)||!['image','video'].includes(data.kind)||data.channel!=='facebook'||!['scheduled','published'].includes(data.status)||!/^\d{4}-(0[1-9]|1[0-2])$/.test(data.month))fail(400,'Invalid social job');
    const previous=data.jobId?await read(db,'social:'+data.jobId):null;
    if(data.jobId&&!previous)fail(404,'Social job missing');if(!data.jobId&&data.revision!==undefined)fail(400,'Existing job required');
    if(previous&&(previous.ownerId!==v.owner_id||['villaId','source','kind','channel','month'].some(k=>previous[k]!==data[k])||data.status!=='published'))fail(409,'Social job binding/status is immutable');

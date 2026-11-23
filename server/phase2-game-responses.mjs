@@ -1,9 +1,8 @@
-import {latestDecisionsEnabled} from './phase2-latest-decisions.mjs';
+
 // Local synthetic acceptance only. This is a response record, not Finance/Prin approval.
 export const gameResponseReference='USER_RELAY_GAME_20261118_SIX_RESPONSES';
 export async function gameResponsesEnabled(db,config){
- if(config?.phase2GameResponses!==true)return false;
- return latestDecisionsEnabled(db,{...config,phase2LatestBusinessDecisions:true});
+ void db;void config;return false; // Superseded by consolidated enforced business requirements.
 }
 export function gameResponsePolicy(policy){
  return {...policy,vatBasisPoints:null,vatRoundingPolicy:null,financeApprovalReference:null,invoiceRequirementsConfirmed:false,billingUnit:null,monthlyBoundary:null,vatMode:'EXCLUSIVE',billingDays:30,paidStartRule:'COMPANY_APPROVAL',premiumChannels:['facebook'],publicPromotions:false,homeSlots:null,homeRotation:null};

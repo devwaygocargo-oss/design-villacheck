@@ -1,5 +1,5 @@
 import {phase2Capabilities,phase2Prices,requirePhase2,requirePhase2Database} from './phase2-policy.mjs';
-import {selectedPhase2GrantRecord,selectedPhase2Grant} from './phase2-grants.mjs';
+import {selectedPhase2GrantRecord,selectedPhase2Grant,phase2VillaGrants} from './phase2-grants.mjs';
 
 // User-relayed Game decisions. No Production activation/configuration path.
 export async function latestDecisionsEnabled(db,config){
@@ -17,13 +17,16 @@ export function downgradedVideoRestriction(previous,packageId,policy){
 }
 export async function publicPackageVideoAllowed(db,villa,config){
  if(!villa)return false;
- if(!await latestDecisionsEnabled(db,config))return true;
- const selected=await selectedPhase2GrantRecord(db,villa,config.phase2Clock?.()??Date.now());
- return !selected?.videoRestriction;
+ if(config?.phase2Enabled!==true)return true;
+ requirePhase2(config);requirePhase2Database(db,config);
+ let selected=await selectedPhase2Grant(db,villa,config.phase2Clock?.()??Date.now());
+ if(!selected){if((await phase2VillaGrants(db,villa)).length)return false;selected={packageId:villa.package_id};}
+ const row=await db.prepare("SELECT value FROM system_settings WHERE key='phase2:v1:policy'").get();
+ return phase2Capabilities(selected.packageId,row?JSON.parse(row.value):{}).video===true;
 }
 function safePublication(job,now){
  if(job.status!=='published'||!Number.isFinite(Date.parse(job.publishedAt))||Date.parse(job.publishedAt)>now)return null;
- const host={facebook:'facebook.com',instagram:'instagram.com',tiktok:'tiktok.com'}[job.channel];let u;try{u=new URL(job.postUrl)}catch{return null}
+ const host=job.channel==='facebook'?'facebook.com':null;let u;try{u=new URL(job.postUrl)}catch{return null}
  if(!host||u.protocol!=='https:'||u.username||u.password||!(u.hostname===host||u.hostname.endsWith('.'+host)))return null;
  return {id:job.id,kind:job.kind,channel:job.channel,postUrl:u.href,publishedAt:job.publishedAt};
 }

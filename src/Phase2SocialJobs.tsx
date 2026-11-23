@@ -3,7 +3,7 @@ import {useCallback,useEffect,useRef,useState,type FormEvent} from "react";
 import {bangkokLocalToUtc} from "../server/phase2-time.mjs";
 type Job={id:string;villaId:string;source:string;kind:string;channel:string;month:string;status:string;postUrl:string|null;publishedAt:string|null;revision?:number;publishedBy?:string;history?:{status:string;by:string;at:string}[]};
 const empty={source:"PACKAGE",kind:"image",channel:"facebook",month:"",status:"scheduled",postUrl:"",publishedAt:""};
-export default function Phase2SocialJobs({request,villaId,facebookOnly=false}:{facebookOnly?:boolean;request:<T>(path:string,data?:unknown)=>Promise<T>;villaId:string}){
+export default function Phase2SocialJobs({request,villaId,facebookOnly=true}:{facebookOnly?:boolean;request:<T>(path:string,data?:unknown)=>Promise<T>;villaId:string}){
  const [jobs,setJobs]=useState<Job[]>([]),[selected,setSelected]=useState(""),[form,setForm]=useState(empty),[busy,setBusy]=useState(false),[error,setError]=useState(""),[message,setMessage]=useState("");
  const lock=useRef(false),feedback=useRef<HTMLParagraphElement>(null),generation=useRef(0);
  const load=useCallback(async()=>{const n=++generation.current,r=await request<{jobs:Job[]}>("/phase2/social");if(n===generation.current)setJobs(r.jobs);},[request]);

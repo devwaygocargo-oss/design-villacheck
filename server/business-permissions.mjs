@@ -6,7 +6,7 @@ import {randomUUID} from 'node:crypto';
 const context=Symbol('business-permission-context');
 const correlations=new WeakMap();
 export function requestCorrelation(req){if(!correlations.has(req))correlations.set(req,randomUUID());return correlations.get(req);}
-export const dailyPermissions=Object.freeze(['dashboard.read','villas.manage','accounts.manage','payments.review','kyc.review','memberships.manage','reports.manage','content.manage','audit.read']);
+export const dailyPermissions=Object.freeze(['dashboard.read','villas.manage','accounts.manage','payments.review','kyc.review','memberships.manage','entitlements.manage','reports.manage','content.manage','audit.read']);
 export const ownerPermissions=Object.freeze(['bank.manage','packages.configure','subscriptions.configure','promotions.configure','gateway.configure','system.configure','roles.manage']);
 export const permissionCatalog=Object.freeze([...dailyPermissions,...ownerPermissions]);
 export async function businessPermissions(db,actor,config){
@@ -32,7 +32,8 @@ export function permissionForRequest(method,path,actor){
  if(/^\/api\/admin\/(access-roles|role|roles|permissions)(?:\/|$)/.test(path))return 'roles.manage';
  if(/^\/api\/admin\/(gateway|payment-gateway)(?:\/|$)/.test(path))return 'gateway.configure';
  if(/^\/api\/admin\/(settings|email-test|otp)(?:\/|$)/.test(path))return 'system.configure';
- if(write&&/^\/api\/admin\/(packages|package-promotions|package-entitlements|basic-promotion)(?:\/|$)/.test(path))return 'packages.configure';
+ if(/^\/api\/admin\/package-entitlements(?:\/|$)/.test(path))return 'entitlements.manage';
+ if(write&&/^\/api\/admin\/(packages|package-promotions|basic-promotion)(?:\/|$)/.test(path))return 'packages.configure';
  if(write&&/^\/api\/admin\/promotions(?:\/|$)/.test(path))return 'promotions.configure';
  if(/^\/api\/admin\/subscriptions(?:\/|$)/.test(path))return 'memberships.manage';
  if(/^\/api\/admin\/cms(?:\/|$)/.test(path))return 'content.manage';

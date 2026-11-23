@@ -28,6 +28,7 @@ async function adminBusinessCore(
       id = pkg[1] || randomUUID(),
       old = pkg[1] ? await getPlan(db, id) : {},
       merged = { ...old, ...data }
+    if(config?.phase2Enabled && merged.billingCycle!=="MONTHLY")invalid("Phase2 packages use the approved fixed30-day period");
     const amount =
       data.price !== undefined
         ? Math.round(Number(data.price) * 100)
@@ -65,7 +66,7 @@ async function adminBusinessCore(
       !Number.isInteger(merged.sort_order)
     )
       invalid("ตั้งค่าแพ็กเกจไม่ถูกต้อง (รองรับ THB/MONTHLY)")
-    if(id === "basic" && amount !== 99000)invalid("Basic ราคาปกติ 990 บาท ใช้การตั้งค่าโปรโมชั่นสำหรับส่วนลด")
+    if(!config?.phase2Enabled && id === "basic" && amount !== 99000)invalid("Basic ราคาปกติ 990 บาท ใช้การตั้งค่าโปรโมชั่นสำหรับส่วนลด")
     const now = new Date().toISOString()
     await db.transaction(async () => {
       const count = await db

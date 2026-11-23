@@ -50,7 +50,7 @@ export default function VillaPackagePanel({
     <section className="merchant-panel subscription-panel">
       <span className="kicker">{uiText("MEMBER ROOM")}</span>
       <h2>{uiText("แพ็กเกจของแต่ละที่พัก")}</h2>
-      <p>{uiText("ราคาต่อเดือน รวมภาษี ต่อที่พัก · การซื้อแพ็กเกจไม่ทำให้ผ่านการตรวจสอบโดยอัตโนมัติ")}</p>
+      <p>{uiText("ราคาต่อเดือน ยังไม่รวม VAT ต่อที่พัก · การซื้อแพ็กเกจไม่ทำให้ผ่านการตรวจสอบโดยอัตโนมัติ")}</p>
       {error && <p role="alert">{uiText(error)}</p>}
       {!store.villas.length ? (
         <>
@@ -97,7 +97,7 @@ export default function VillaPackagePanel({
           const included=new Set(p.features.map(feature=>feature.trim()));
           return <article key={p.id} data-plan-id={p.id} className={`subscription-plan${selectedPlanId===p.id?" active":""}`}>
             <button type="button" aria-pressed={selectedPlanId===p.id} onClick={()=>setSelected(p.id)}>
-              <strong>{p.name}</strong><span>{p.pricingPending ? <>{uiText("ราคาเต็ม ฿")}{((p.regularAmount??p.amount)/100).toLocaleString(localeTag())}{uiText(" · ส่วนลด ")}{p.promotion?.percent}{uiText("% · ยอดสุทธิรอยืนยันการปัดเศษ")}</> : p.promotion ? <><del>{uiText("฿")}{((p.regularAmount ?? p.amount)/100).toLocaleString(localeTag())}</del>{uiText(" · ลด ")}{p.promotion?.percent}% (Discount {p.promotion?.percent}{uiText("%) · ส่วนลด ฿")}{((p.discountAmount??0)/100).toLocaleString(localeTag())}{uiText(" · สุทธิ ฿")}{((p.netAmount??0)/100).toLocaleString(localeTag())}</> : <>{uiText("ราคาเต็ม ฿")}{((p.regularAmount??p.amount)/100).toLocaleString(localeTag())}{uiText(" · ส่วนลด 0% (Discount 0%) · ส่วนลด ฿0 · สุทธิ ฿")}{((p.netAmount??p.amount)/100).toLocaleString(localeTag())}</>}</span><small>{uiText("รวมภาษี · ทุกแพ็กเกจเขียนรีวิวได้")}</small>
+              <strong>{p.name}</strong><span>{p.pricingPending ? <>{uiText("ราคาเต็ม ฿")}{((p.regularAmount??p.amount)/100).toLocaleString(localeTag())}{uiText(" · ส่วนลด ")}{p.promotion?.percent}{uiText("% · ยอดสุทธิรอยืนยันการปัดเศษ")}</> : p.promotion ? <><del>{uiText("฿")}{((p.regularAmount ?? p.amount)/100).toLocaleString(localeTag())}</del>{uiText(" · ลด ")}{p.promotion?.percent}% (Discount {p.promotion?.percent}{uiText("%) · ส่วนลด ฿")}{((p.discountAmount??0)/100).toLocaleString(localeTag())}{uiText(" · สุทธิ ฿")}{((p.netAmount??0)/100).toLocaleString(localeTag())}</> : <>{uiText("ราคาเต็ม ฿")}{((p.regularAmount??p.amount)/100).toLocaleString(localeTag())}{uiText(" · ส่วนลด 0% (Discount 0%) · ส่วนลด ฿0 · สุทธิ ฿")}{((p.netAmount??p.amount)/100).toLocaleString(localeTag())}</>}</span><small>{uiText("ยังไม่รวม VAT · ทุกแพ็กเกจเขียนรีวิวได้")}</small>
             </button>
             {p.id === "basic" && <p>{uiText(basicVerificationNotice)}</p>}
             <ul className="package-feature-list" aria-label={uiText(`สิทธิ์ของ ${p.name}`)}>
