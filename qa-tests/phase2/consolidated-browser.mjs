@@ -30,6 +30,11 @@ try{
     }
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);await page.screenshot({path:'qa-evidence/consolidated-'+role+'-'+width+'.png'});
    }
+   const merchantLogin=await ctx.request.post(f.base+'/api/auth/login',{headers:{Origin:f.base},data:{email:f.users.merchant.email,password:syntheticPassword}});assert.equal(merchantLogin.status(),200);
+   await page.goto(base+'/merchant#page=owner-membership');await page.getByRole('region',{name:'New package terms'}).waitFor();
+   await page.getByRole('combobox',{name:'ที่พัก / Villa',exact:true}).selectOption(v.id);
+   const countdown=page.locator('[data-phase2-countdown="'+v.id+'"]');await countdown.waitFor();assert.equal(await countdown.getAttribute('data-expiry-state'),'ACTIVE');assert.match(await countdown.textContent(),/เหลือ 30 วัน/);assert.match(await countdown.textContent(),/บริษัทอนุมัติ/);
+   await page.screenshot({path:'qa-evidence/consolidated-countdown-'+width+'.png'});rows.push({width,role:'merchant',flow:'Approved grant appears as30-day server countdown with payment+company-approval QR restoration rule',status:'PASS'});
    assert.deepEqual(errors,[]);
   }finally{await ctx.close();await f.close();}
  }
