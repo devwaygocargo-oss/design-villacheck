@@ -1,0 +1,16 @@
+.merchant-edit-workspace{display:grid;gap:24px;padding:24px!important}
+.merchant-edit-workspace>.merchant-edit-other{font-size:14px;color:#52677a}
+.merchant-edit-other summary{cursor:pointer;font-weight:600}
+.merchant-edit-nav{display:flex;flex-wrap:wrap;gap:10px;padding:12px;background:#edf4f8;border-radius:12px}
+.merchant-edit-nav a{padding:10px 16px;color:#17384b;font-weight:600;text-decoration:none;border-radius:8px;background:white}
+.merchant-edit-workspace .merchant-edit-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;max-width:none;width:100%;padding:24px;border:1px solid #dce6ed;border-radius:14px;scroll-margin-top:24px}
+.merchant-edit-form>h2,.merchant-edit-form>p,.merchant-edit-form>.merchant-edit-cover,.merchant-edit-form>button,.merchant-edit-form>label:has(textarea){grid-column:1/-1}
+.merchant-edit-form>h2{margin:0}.merchant-edit-form>label{min-width:0;display:grid;gap:8px}
+.merchant-edit-cover{max-width:480px;width:100%}.merchant-edit-cover img{max-height:260px!important;object-fit:contain!important;background:#edf4f8}
+.merchant-edit-section{min-width:0;scroll-margin-top:24px}.merchant-edit-section>h2{font-size:22px;margin:0 0 16px}
+.merchant-edit-primary-document{display:grid;gap:12px;padding:20px;border:1px solid #dce6ed;border-radius:12px;background:#f5f9fc;margin-bottom:18px;overflow-wrap:anywhere}
+.merchant-edit-primary-document h3,.merchant-edit-primary-document p{margin:0}.merchant-edit-primary-document>a{justify-self:start}.merchant-edit-primary-document label{display:grid;gap:10px}.merchant-edit-primary-document input{max-width:100%}
+.merchant-edit-workspace .ownership-documents .portal-form{max-width:none}
+.merchant-edit-savebar{position:sticky;bottom:12px;z-index:8;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 22px;background:#fff;border:1px solid #c4d6e2;border-radius:14px;box-shadow:0 4px 24px #17384b20}
+.merchant-edit-savebar>div{min-width:0}.merchant-edit-savebar p{margin:4px 0 0;font-size:13px;line-height:1.6;color:#435c6d}.merchant-edit-savebar button{flex-shrink:0;min-height:48px}
+@media(max-width:700px){.merchant-edit-workspace{padding:16px!important;gap:18px}.merchant-edit-workspace .merchant-edit-form{grid-template-columns:minmax(0,1fr);padding:16px;gap:16px}.merchant-edit-nav{gap:6px}.merchant-edit-nav a{font-size:13px;padding:9px}.merchant-edit-savebar{position:static;display:grid;padding:16px}.merchant-edit-savebar button{width:100%}.merchant-edit-savebar strong{display:none}}

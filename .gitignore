@@ -1,0 +1,10 @@
+node_modules/
+.env*
+.next/
+.build/
+backend/generated/
+*.tsbuildinfo
+.vercel/
+
+node_modules
+qa-evidence/

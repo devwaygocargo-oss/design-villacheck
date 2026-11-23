@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import {randomUUID} from 'node:crypto';import {openPostgres} from '../../server/postgres.mjs';
+test('Existing Production schema baseline applies twice to an empty isolated schema without seeding accounts or business data',async()=>{
+ const url=process.env.TEST_DATABASE_URL;assert(url&&['localhost','127.0.0.1'].includes(new URL(url).hostname));const schema='baseline_'+randomUUID().replaceAll('-',''),control=await openPostgres(url,{bootstrap:false});let db;
+ try{await control.exec('CREATE SCHEMA '+schema);db=await openPostgres(url,{bootstrap:false,options:'-c search_path='+schema});const sql=fs.readFileSync('prisma/production-migrations/0001_production_schema/migration.sql','utf8');assert(!/\b(?:INSERT|UPDATE|DELETE|TRUNCATE)\s/i.test(sql));await db.exec(sql);await db.exec(sql);const tables=await db.prepare("SELECT tablename FROM pg_tables WHERE schemaname=? ORDER BY tablename").all(schema);assert.equal(tables.length,19);for(const {tablename} of tables){assert(/^[a-z_]+$/.test(tablename));assert.equal(Number((await db.prepare('SELECT count(*) n FROM "'+tablename+'"').get()).n),0);}}
+ finally{await db?.close();await control.exec('DROP SCHEMA IF EXISTS '+schema+' CASCADE');await control.close();}
+});

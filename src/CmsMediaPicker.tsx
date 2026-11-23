@@ -1,0 +1,16 @@
+import {uploadCmsImage} from "./cmsMediaUpload";
+import {uiText} from "./uiLanguage";
+import {useEffect,useState,useRef} from "react"
+import {api} from "./api"
+export type CmsMedia={id:string;name:string;url:string;mime:string;source?:string}
+export default function CmsMediaPicker({label,value,onChange,library,onUploaded}:{label:string;value:string;onChange:(url:string)=>void;library?:CmsMedia[];onUploaded?:(media:CmsMedia)=>void}){
+ const fileInput=useRef<HTMLInputElement>(null);
+ const previous=useRef(value);const choose=(next:string)=>{previous.current=value;onChange(next)};
+ const change=useRef(onChange),active=useRef(true);change.current=choose;useEffect(()=>{active.current=true;return()=>{active.current=false}},[]);
+ const [media,setMedia]=useState<CmsMedia[]>([]),[busy,setBusy]=useState(false),[error,setError]=useState('')
+ const options=[...new Map([...(library||[]),...media].map(m=>[m.id,m])).values()];
+ const load=async()=>{const data=await api<{media:CmsMedia[]}>('/admin/cms/media');setMedia(data.media.map(m=>({...m,url:m.url||'/api/public/cms-media/'+m.id})))}
+ useEffect(()=>{if(!library)void load().catch(e=>setError(e.message))},[Boolean(library)])
+ const upload=async(file?:File)=>{if(!file)return;setBusy(true);setError('');try{const result=await uploadCmsImage(file);if(active.current){onUploaded?.(result);await load();change.current(result.url)}}catch(e){setError(e instanceof Error?e.message:'อัปโหลดไม่สำเร็จ')}finally{setBusy(false)}}
+ return <div className="cms-image-field"><div className="cms-image-upload"><strong>{uiText(label)}</strong><div className="cms-image-preview">{value?<img loading="lazy" decoding="async" src={value} alt={label}/>:<span>{uiText("ยังไม่ได้เลือกรูป")}</span>}</div><button type="button" className="primary-button" aria-label={uiText("เลือกหรืออัปโหลดรูป")+" — "+uiText(label)} disabled={busy} onClick={()=>fileInput.current?.click()}>{uiText("เลือกหรืออัปโหลดรูป")}</button></div><details className="cms-image-advanced"><summary>{uiText("ใช้ลิงก์รูป (ถ้ามี)")}</summary><label>{uiText(label)} URL<input value={value} onChange={e=>choose(e.target.value)}/></label></details><label>{uiText("เลือกจากคลังรูป")}<select aria-label={label+uiText(" เลือกจากคลังรูป")} value={options.some(m=>m.url===value)?value:''} onChange={e=>{if(e.target.value)choose(e.target.value)}}><option value="">{uiText("เลือกภาพ…")}</option>{options.map(m=><option key={m.id} value={m.url}>{uiText(m.name.replace('cms-image:',''))}</option>)}</select></label><label className="cms-file-native">{uiText("อัปโหลด ")}{uiText(label)}<input ref={fileInput} type="file" accept="image/jpeg,image/png" disabled={busy} onChange={e=>{void upload(e.target.files?.[0]);e.target.value=''}}/></label><p>{uiText("JPG/PNG ≤5 MB, ≤8192 px/side, ≤16 MP / ด้านละไม่เกิน 8192 px และ 16 ล้านพิกเซล")}</p>{busy&&<p role="status">{uiText("กำลังอัปโหลด…")}</p>}{error&&<p role="alert">{uiText(error)}</p>}<button type="button" disabled={busy||previous.current===value} onClick={()=>onChange(previous.current)}>{uiText("ยกเลิกการเปลี่ยนภาพ / Cancel image change")}</button><button type="button" disabled={busy} onClick={()=>choose('')}>{uiText("ล้าง ")}{uiText(label)}</button></div>
+}

@@ -1,0 +1,34 @@
+# Upload source only; configure private staging variables in the host.
+.env*
+.git
+node_modules
+.next
+.build
+backend/generated
+server/data
+.DS_Store
+.codex
+.agents
+.aws
+audit-results
+reports
+docs/validation
+*.log
+*.pem
+*.key
+
+tsconfig.tsbuildinfo
+
+# Validation and release evidence are never runtime inputs.
+qa-tests
+server/*.test.mjs
+server/test-*.mjs
+scripts/*test*.mjs
+docs/reports
+server/master-test-fixtures.mjs
+
+/scripts/
+
+# Local QA evidence never belongs in a deployment.
+qa-evidence
+tools/qa

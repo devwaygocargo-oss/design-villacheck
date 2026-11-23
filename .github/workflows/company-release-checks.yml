@@ -1,0 +1,32 @@
+name: Company release checks
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  local-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npx prisma validate
+      - run: npm run test:backend
+      - run: node qa-tests/closure/run-full-phase1-parity.mjs
+      - run: node qa-tests/approval-hotfix/run.mjs
+
+# All test runners create disposable loopback databases and scrub cloud secrets.
+# No deploy command, Production connection, role grant or cloud token is required.

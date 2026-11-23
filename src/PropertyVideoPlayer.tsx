@@ -1,0 +1,7 @@
+import './property-media-draft.css';
+import {useState} from 'react';import {useUiLanguage} from './uiLanguage';import {youtubeVideoId} from './youtube';
+type Video={id:string;url:string;name:string;provider?:string;poster?:string};
+export default function PropertyVideoPlayer({video,poster}:{video:Video;poster?:string}){
+ const {locale}=useUiLanguage(),en=locale==='en',[error,setError]=useState(false),id=youtubeVideoId(video.url);
+ return <><div className="property-video-player">{id?<iframe title={video.name||'YouTube video'} src={'https://www.youtube-nocookie.com/embed/'+id+'?playsinline=1&rel=0'} loading="lazy" referrerPolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen/>:<video controls playsInline preload="metadata" poster={video.poster||poster||'/villa-placeholder.svg'} src={video.url} aria-label={video.name} onPlay={event=>{const current=event.currentTarget;current.closest('.villa-video-gallery')?.querySelectorAll('video').forEach(other=>{if(other!==current)other.pause()})}} onError={()=>setError(true)}/>}</div>{id&&<a href={'https://www.youtube.com/watch?v='+id} target="_blank" rel="noreferrer">{en?'Open on YouTube':'เปิดบน YouTube'}</a>}{error&&<p role="alert">{en?'Video unavailable.':'ไม่สามารถเล่นวิดีโอได้'} <a href={video.url} target="_blank" rel="noreferrer">{en?'Open video':'เปิดวิดีโอ'}</a></p>}</>;
+}

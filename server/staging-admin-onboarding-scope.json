@@ -1,0 +1,23 @@
+{
+  "authorization": "OWNER_EXPLICIT_FOUR_STAGING_INVITATIONS_20261109",
+  "environment": "staging",
+  "origin": "https://design-villacheck.vercel.app",
+  "admins": [
+    {
+      "id": "090588a4-8b14-4236-b4bb-4de25f1b637e",
+      "email": "mookyuwaaa@gmail.com"
+    },
+    {
+      "id": "62391626-3cc9-4a24-99ca-3294fa6ef9d5",
+      "email": "pk.waritt@gmail.com"
+    },
+    {
+      "id": "89144662-962c-4560-8077-cf6280f352a2",
+      "email": "gamefz.fzz@gmail.com"
+    },
+    {
+      "id": "65542847-b29c-4070-92d4-e1f0355ccff2",
+      "email": "taammaa1234@outlook.co.th"
+    }
+  ]
+}

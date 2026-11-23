@@ -1,0 +1,12 @@
+.review-media-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(170px,100%),1fr)); gap:12px; margin:14px 0; }
+.review-media-grid figure { margin:0; padding:10px; min-width:0; border:1px solid #dbe5df; border-radius:12px; background:#fff; }
+.review-media-grid img { display:block; width:100%; height:170px; object-fit:cover; border-radius:8px; }
+.review-media-grid video { display:block; width:100%; max-height:240px; min-height:120px; border-radius:8px; background:#111; }
+.review-media-grid figcaption { overflow-wrap:anywhere; margin-top:8px; color:#60736d; font-size:12px; }
+.review-media-grid figure>a:not(:first-child),.review-media-grid button { display:inline-block; margin-top:8px; }
+.review-attachments { min-width:0; margin:16px 0; padding:16px; border:1px solid #dbe5df; border-radius:12px; }
+.review-attachments>label { display:grid; gap:8px; }
+.review-attachments input[type=file] { max-width:100%; min-width:0; }
+.review-upload-progress { display:grid; gap:8px; }
+.review-upload-progress progress { width:100%; accent-color:#15796f; }
+@media(max-width:480px) { .review-media-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .review-media-grid img { height:130px; } }

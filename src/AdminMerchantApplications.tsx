@@ -1,0 +1,17 @@
+import {useEffect,useState} from "react";
+import {api,currentAccount} from "./api";
+import {uiText} from "./uiLanguage";
+import {MerchantApplicationSummary,type MerchantApplicationRecord} from "./MerchantApplication";
+export function MerchantApplicationReview({row,onReview,busy,embedded=false}:{row:MerchantApplicationRecord;onReview:(row:MerchantApplicationRecord,status:string,reason:string)=>Promise<void>;busy:boolean;embedded?:boolean}){
+ const [reason,setReason]=useState("");
+ const Container=embedded?"section":"article";
+ return <Container className={embedded?"merchant-application-review":"merchant-panel"}><h3>{row.fields.businessName} / {row.fields.businessNameEn}</h3><p>{row.fields.contactName}</p><p>{row.fields.address}</p><MerchantApplicationSummary application={row}/>{["pending","approved"].includes(row.status)&&<div className="form-stack"><label className="login-field"><span>{uiText("merchant.application.reason")}</span><textarea maxLength={2000} value={reason} onChange={e=>setReason(e.target.value)}/></label><div className="button-row">{row.status==="pending"&&<button type="button" className="primary-button" disabled={busy} onClick={()=>void onReview(row,"approved",reason)}>{uiText("merchant.application.approveAction")}</button>}<button type="button" disabled={busy||!reason.trim()} onClick={()=>void onReview(row,"changes",reason)}>{uiText("merchant.application.changesAction")}</button>{row.status==="pending"&&<button type="button" disabled={busy||!reason.trim()} onClick={()=>void onReview(row,"rejected",reason)}>{uiText("merchant.application.rejectAction")}</button>}</div></div>}</Container>;
+}
+export default function AdminMerchantApplications(){
+ const [rows,setRows]=useState<MerchantApplicationRecord[]>([]),[filter,setFilter]=useState("pending"),[error,setError]=useState(""),[busy,setBusy]=useState(false);
+ const load=async()=>{await currentAccount();setRows((await api<{applications:MerchantApplicationRecord[]}>("/admin/merchant-registrations")).applications);};
+ useEffect(()=>{void load().catch(e=>setError(e.message));},[]);
+ const review=async(row:MerchantApplicationRecord,status:string,reason:string)=>{setBusy(true);setError("");try{await currentAccount();await api('/admin/merchant-registrations/'+row.userId,{action:"review",expectedRevision:row.revision,status,reason});await load();}catch(e){setError(e instanceof Error?e.message:"merchant.application.failed");}finally{setBusy(false);}};
+ const visible=rows.filter(r=>filter==="all"||r.status===filter);
+ return <section className="admin-merchant-applications"><h2>{uiText("merchant.application.queue")}</h2><p>{uiText("merchant.application.approvalNotice")}</p>{error&&<p role="alert">{uiText(error)}</p>}<label>{uiText("merchant.application.filter")}<select aria-label={uiText("merchant.application.filter")} value={filter} onChange={e=>setFilter(e.target.value)}><option value="all">{uiText("merchant.application.all")}</option>{["pending","approved","changes","rejected"].map(status=><option key={status} value={status}>{uiText("merchant.application."+status)}</option>)}</select></label><button type="button" disabled={busy} onClick={()=>void load().catch(e=>setError(e.message))}>{uiText("merchant.application.refresh")}</button>{visible.map(row=><MerchantApplicationReview key={row.userId+":"+row.revision} row={row} busy={busy} onReview={review}/>)}{!visible.length&&<p>{uiText("merchant.application.empty")}</p>}</section>;
+}

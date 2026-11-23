@@ -1,0 +1,29 @@
+.pending-review{padding:24px!important}
+.pending-review-hero{display:grid;grid-template-columns:minmax(240px,360px) minmax(0,1fr);gap:28px;align-items:start}
+.pending-review-cover{margin:0;min-width:0}
+.pending-review-cover figcaption{font-size:14px;font-weight:700;margin-bottom:10px;color:#17384b}
+.pending-review-cover-frame{display:grid;place-items:center;min-height:240px;aspect-ratio:4/3;background:#edf3f7;border:1px solid #dce6ed;border-radius:14px;overflow:hidden}
+.pending-review-cover-frame img{display:block;width:100%;height:100%;max-height:300px;object-fit:contain}
+.pending-review-cover-link{display:inline-flex;align-items:center;min-height:44px;font-size:14px;color:#17607a;text-decoration:underline;text-underline-offset:3px}
+.pending-review-no-cover{padding:24px;text-align:center;color:#546b7a}
+.pending-review-cover-error{color:#9b311f;font-size:14px}
+.pending-review-summary{min-width:0;display:grid;gap:16px}
+.pending-review-summary h2{font-size:28px;line-height:1.4;margin:0}
+.pending-review-status{justify-self:start;padding:7px 12px;background:#fff3d9;color:#80520a;border-radius:20px;font-size:13px;font-weight:600}
+.pending-review-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0}
+.pending-review-facts dt,.pending-review .pending-villa-fields dt{font-size:13px;color:#526b7c}
+.pending-review-facts dd{font-size:15px;font-weight:600;margin:5px 0 0}
+.pending-review-reason{padding:16px;border-radius:12px;background:#f2f7fb;border-left:3px solid #2c7991}
+.pending-review-reason strong{font-size:14px}.pending-review-reason p{margin:7px 0;font-size:15px;line-height:1.7}.pending-review-reason small{color:#526b7c;line-height:1.6}
+.pending-review-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:24px 0 0;padding:8px;background:#edf3f7;border-radius:12px}
+.pending-review-tabs button{min-height:48px;padding:10px;border:0;border-radius:8px;color:#29485c;background:transparent;font-size:14px;font-weight:600;white-space:normal}
+.pending-review-tabs button[aria-selected=true]{background:#17384b;color:#fff}
+.pending-review-panel{padding-top:24px;min-width:0}.pending-review-panel[hidden]{display:none}
+.pending-review-panel>h3{margin:0 0 16px;font-size:20px}.pending-review-panel>p{color:#526b7c;line-height:1.7}
+.pending-review .pending-villa-fields{gap:0 24px;margin:0 0 20px}.pending-review .pending-villa-fields>div{padding:14px 0;border-bottom:1px solid #e5edf2}.pending-review .pending-villa-fields dd{font-size:15px;line-height:1.6;color:#17384b}
+.pending-review-package{padding:16px;border:1px solid #dce6ed;border-radius:12px}.pending-review-package>summary{font-weight:600;cursor:pointer;min-height:24px}
+.pending-review-original-document{padding:18px;border:1px solid #dce6ed;border-radius:12px;margin-bottom:18px}.pending-review-original-document h3{margin:0 0 10px}.pending-review-original-document>p{overflow-wrap:anywhere}
+.pending-review-decision{max-width:760px}.pending-review-decision .button-row{display:flex;flex-wrap:wrap;gap:10px}.pending-review-decision textarea{min-height:120px}
+.pending-review-feedback{margin:20px 0}.pending-review-help{margin:16px 0;padding:14px 18px!important}.pending-review-help>summary{font-size:14px;font-weight:600;cursor:pointer}.pending-review-help p{font-size:14px;line-height:1.7}
+@media(max-width:1100px){.pending-review-hero{grid-template-columns:minmax(200px,300px) minmax(0,1fr);gap:20px}.pending-review-facts{grid-template-columns:1fr 1fr}.pending-review-facts>div:last-child{grid-column:1/-1}}
+@media(max-width:700px){.pending-review{padding:16px!important}.pending-review-hero{grid-template-columns:minmax(0,1fr);gap:18px}.pending-review-cover-frame{min-height:0;max-height:300px}.pending-review-summary h2{font-size:24px}.pending-review-tabs{grid-template-columns:1fr 1fr;gap:6px}.pending-review-tabs button{font-size:13px}.pending-review-facts{grid-template-columns:1fr 1fr}.pending-review-decision .button-row{display:grid;grid-template-columns:1fr;width:100%}}

@@ -1,0 +1,6 @@
+import {uiText} from "./uiLanguage";
+import CmsMediaPicker, {type CmsMedia} from "./CmsMediaPicker";
+export type BannerEnglish = Partial<Record<"image"|"mobileImage"|"title"|"description"|"label"|"href"|"eyebrow",string>>;
+export default function BannerEnglishEditor({value={},onChange,media,onUploaded}:{value?:BannerEnglish;onChange:(value:BannerEnglish)=>void;media:CmsMedia[];onUploaded:(media:CmsMedia)=>void}) {
+ return <fieldset className="cms-block-editor"><legend>{uiText("แบนเนอร์ภาษาอังกฤษ (English)")}</legend><p>{uiText("ช่องหลักด้านบนใช้สำหรับภาษาไทย ข้อความภาษาอังกฤษที่เว้นว่างจะไม่แสดง รูปที่เว้นว่างจะใช้รูปหลัก")}</p><CmsMediaPicker label={uiText("ภาพคอมพิวเตอร์ (English)")} value={value.image||""} library={media} onUploaded={onUploaded} onChange={image=>onChange({...value,image})}/><CmsMediaPicker label={uiText("ภาพมือถือ (English)")} value={value.mobileImage||""} library={media} onUploaded={onUploaded} onChange={mobileImage=>onChange({...value,mobileImage})}/>{([["eyebrow","ข้อความเหนือหัวข้อ"],["title","หัวข้อ"],["description","คำอธิบาย"],["label","ข้อความปุ่ม"],["href","ลิงก์ปลายทาง"]] as const).map(([key,label])=><label key={key}>{uiText(label)} (English)<textarea rows={key==="description"?3:1} value={value[key]||""} onChange={e=>onChange({...value,[key]:e.target.value})}/></label>)}</fieldset>;
+}

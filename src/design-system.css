@@ -1,0 +1,219 @@
+/* Shared visual tokens. Brand blue/cyan and semantic status colors are intentional. */
+:root {
+  --font-ui: var(--font-line-seed), Tahoma, Arial, sans-serif;
+  --action: #111111;
+  --action-hover: #262626;
+  --text-primary: #171717;
+  --text-secondary: #525252;
+  --surface: #ffffff;
+  --surface-secondary: #f5f5f5;
+  --border-neutral: #e5e5e5;
+  --focus-ring: #111111;
+  --on-action: #ffffff;
+  --ink: var(--text-primary);
+  --muted: var(--text-secondary);
+  --line: var(--border-neutral);
+  --pale: var(--surface-secondary);
+  --white: var(--surface);
+}
+body { font-family: var(--font-ui); font-size: 16px; line-height: 1.65; color: var(--text-primary); }
+button, input, select, textarea, dialog { font-family: var(--font-ui); }
+h1, h2, h3, h4, h5, h6 { font-family: var(--font-ui); font-weight: 700; line-height: 1.45; }
+button, input, select, textarea { line-height: 1.5; }
+textarea { font-size: inherit; }
+.portal-content h1 { font-size: clamp(26px, 3vw, 36px); }
+.portal-content h2 { line-height: 1.5; }
+.portal-side nav button, .portal-side > button { line-height: 1.6; }
+.portal-form input, .portal-form select, .portal-form textarea,
+.merchant-panel input, .merchant-panel select, .merchant-panel textarea { font-size: 16px; }
+:where(button, a, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--focus-ring); outline-offset: 3px;
+  box-shadow: 0 0 0 2px var(--surface);
+}
+.app .primary-button, .primary-button, .login-submit,
+.shortcut-search button, .villa-discovery-message button {
+  background: var(--action); color: var(--on-action); border-color: var(--action);
+}
+.app .primary-button:hover:not(:disabled), .primary-button:hover:not(:disabled),
+.login-submit:hover:not(:disabled), .shortcut-search button:hover:not(:disabled),
+.villa-discovery-message button:hover:not(:disabled) {
+  background: var(--action-hover); border-color: var(--action-hover); color: var(--on-action);
+}
+.primary-button:disabled, .login-submit:disabled { opacity: .55; cursor: not-allowed; }
+.shortcut-search button span { color: inherit; }
+.portal-side nav button.active { background: var(--action); color: var(--on-action); }
+.portal-merchant, .portal-main, .portal-content { background: var(--surface-secondary); }
+.portal-merchant .portal-content, .merchant-panel, .portal-merchant .merchant-panel,
+.cms-editor, .cms-toolbar, .cms-block-editor { background: var(--surface); border-color: var(--border-neutral); }
+.merchant-steps span, .free-period-banner, .subscription-selection,
+.approved-villa-social, .villa-entitlements, .cms-banner-table .is-selected,
+.account-dropdown button:hover, .account-dropdown button:focus-visible,
+.gallery-picker:hover, .home-feature-merchant, .home-news-art,
+.home-newsletter, .home-villa-discovery, .villa-discovery-message {
+  background: var(--surface-secondary); color: var(--text-primary); border-color: var(--border-neutral);
+}
+.hero, .destination-map, .province-map, .premium-pricing { background: var(--surface-secondary); }
+.home-feature-copy h2, .home-feature-copy ul, .home-merchant-tools span,
+.home-feature-copy li > svg, .home-news-art, .villa-discovery-controls button { color: var(--text-primary); }
+.home-feature-copy > p, .banner-search p, .villa-discovery-head p,
+.shortcut-search-hint, .shortcut-search-hint button { color: var(--text-secondary); }
+.home-merchant-tools span, .home-news-card { border-color: var(--border-neutral); }
+.home-shortcuts { background: var(--surface); color: var(--text-primary); }
+.shortcut-search { background: var(--surface-secondary); border-color: var(--border-neutral); }
+.shortcut-search input { color: var(--text-primary); }
+.shortcut-search input::placeholder { color: var(--text-secondary); }
+.shortcut-search-symbol { color: var(--text-primary); }
+.shortcut-search:focus-within { border-color: var(--action); box-shadow: 0 0 0 1px var(--action); }
+.shortcut-icon { background: var(--action); border-color: var(--action); color: var(--on-action); }
+.shortcut-icon-fill { fill: currentColor; }
+.shortcut-icon-accent { stroke: currentColor; }
+.shortcut-item { color: var(--text-primary); }
+.shortcut-item:hover { color: var(--text-primary); background: var(--surface-secondary); }
+.shortcut-item:hover .shortcut-icon { background: var(--action-hover); border-color: var(--action-hover); }
+.shortcut-search-hint button:hover { color: var(--text-primary); }
+.home-feature-image:after { background: linear-gradient(transparent, #111111d9); }
+.home-feature-image-note small, .vc-banner-copy .kicker { color: var(--on-action); }
+.vc-ad-label, .vc-banner-prev, .vc-banner-next { color: var(--text-primary); }
+.vc-banner-controls .vc-banner-pause { background: var(--action); }
+.subscription-plan.active, .subscription-options button.active { background: var(--surface-secondary); border-color: var(--action); box-shadow: 0 0 0 1px var(--action); }
+/* Status/approval badges, warning/error notices, and provider logos keep their semantic palettes. */
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+/* Neutral editorial/navigation accents, separate from semantic status badges. */
+.home-news { background: var(--surface-secondary); color: var(--text-primary); }
+.home-news-all, .home-news-read, .home-news-tag, .home-news-controls button,
+.villa-discovery-all, .villa-discovery-heading h2 { color: var(--text-primary); }
+.home-news-heading p, .home-news-body p, .home-news-count,
+.villa-discovery-heading p, .villa-discovery-controls { color: var(--text-secondary); }
+.home-feature-image { background: var(--surface-secondary); }
+.villa-discovery-skeleton > span { background: var(--border-neutral); }
+.villa-discovery-skeleton > div {
+  background-image: linear-gradient(110deg, var(--border-neutral) 25%, var(--surface-secondary) 45%, var(--border-neutral) 65%);
+}
+.app :where(button, a, input, select, textarea, summary, [tabindex]):focus-visible,
+.portal :where(button, a, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--focus-ring); outline-offset: 3px;
+  box-shadow: 0 0 0 2px var(--surface);
+}
+.user-greeting, .info-article-list article > span,
+.home-service-body > span, .scan-preview-card span { color: var(--text-primary); }
+.home-service-art { background: var(--surface-secondary); color: var(--text-primary); }
+.home-service-body p { color: var(--text-secondary); }
+.footer-social button:hover, .footer-social a:hover {
+  color: var(--on-action); background: var(--action); border-color: var(--action);
+}
+
+/* Text fields keep their container's focus indicator without an inner frame. */
+input:not([type]),
+input:is([type="text"], [type="email"], [type="password"], [type="search"], [type="tel"], [type="url"], [type="number"]),
+textarea {
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Hero navigation: explicit interaction, small visual dots, generous hit areas. */
+.vc-banner { --hero-dot-size: 6px; --hero-dot-active-size: 8px; --hero-control-size: 44px; touch-action: pan-y; }
+.vc-banner-prev,.vc-banner-next { width:var(--hero-control-size);height:var(--hero-control-size);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .18s; }
+.vc-banner[data-navigation="visible"] .vc-banner-prev,.vc-banner[data-navigation="visible"] .vc-banner-next { opacity:1;visibility:visible;pointer-events:auto; }
+.vc-banner-controls { gap:8px;max-width:calc(100% - 144px);padding:3px 8px;border-radius:24px;background:rgb(17 17 17 / 65%); }
+.vc-banner-dots { display:flex;align-items:center;position:relative;overflow-x:auto;max-width:224px;scrollbar-width:none; }
+.vc-banner-dots::-webkit-scrollbar { display:none; }
+.vc-banner-controls .vc-banner-dots button { position:relative;flex:0 0 32px;width:32px;height:36px;background:transparent;border-radius:50%;padding:0; }
+.vc-banner-dots button::after { content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:var(--hero-dot-size);height:var(--hero-dot-size);border-radius:50%;background:rgb(255 255 255 / 65%); }
+.vc-banner-dots button.active::after { width:var(--hero-dot-active-size);height:var(--hero-dot-active-size);background:#fff; }
+.vc-banner-controls .vc-banner-pause { flex:0 0 36px;width:36px;height:36px;border-radius:50%; }
+.vc-banner :is(button,a):focus-visible,.vc-banner:focus-visible { outline:3px solid #fff;outline-offset:3px;box-shadow:0 0 0 5px var(--action,#111); }
+@media (prefers-reduced-motion:reduce) { .vc-banner-slide,.vc-banner-prev,.vc-banner-next { transition:none; } }
+
+/* Demo-only display fallbacks; real upload counts and media ownership stay unchanged. */
+.demo-photo { display:block;aspect-ratio:16/10;object-fit:cover;max-width:100%; }
+.demo-empty-gallery { margin:16px 0;max-width:720px; }
+.demo-empty-gallery img { width:100%;height:auto;border-radius:12px; }
+.demo-empty-gallery figcaption { font-size:12px;padding:8px;color:var(--text-primary,#171717);background:var(--surface-muted,#f5f5f5); }
+.card-image:has(img[data-demo-image="true"])::after,.merchant-cover:has(img[data-demo-image="true"])::after,.discovery-villa-photo:has(img[data-demo-image="true"])::after { content:"ภาพประกอบ DEMO";position:absolute;bottom:8px;right:8px;padding:4px 8px;border-radius:4px;background:#111e;color:#fff;font-size:11px;pointer-events:none; }
+
+/* Master status corner ribbon */
+:root{--review-pending:#64748b;--review-reviewing:#2563eb;--review-changes:#d97706;--review-approved:#15803d;--review-rejected:#dc2626;}
+.villa-image,.merchant-cover{position:relative;overflow:hidden;border-radius:12px;isolation:isolate;}
+.status-corner-ribbon{position:absolute;z-index:2;top:22px;right:-59px;width:190px;min-height:26px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:4px 0;transform:rotate(45deg);color:#fff;font-size:14px;line-height:18px;font-weight:700;white-space:nowrap;pointer-events:none;box-shadow:0 3px 7px #0003;}
+.status-corner-ribbon span{display:block;max-width:82px;line-height:18px;white-space:normal;overflow-wrap:anywhere;text-align:center;}
+.status-corner-ribbon.status-reviewing{right:-52px;}
+.status-corner-ribbon.status-changes{right:-52px;color:#171717;font-size:13px;}
+.status-corner-ribbon.status-changes span{max-width:90px;transform:translateY(3px);}
+.status-corner-ribbon.status-rejected span{transform:translateY(1px);}
+.status-pending{background:var(--review-pending)}.status-reviewing{background:var(--review-reviewing)}.status-changes{background:var(--review-changes)}.status-approved{background:var(--review-approved)}.status-rejected{background:var(--review-rejected)}
+/* Public gallery: cover first, no CMS ribbon or private documents. */
+.villa-photo-slider{position:relative;border-radius:14px;overflow:hidden;background:var(--surface-muted,#f5f5f5);touch-action:pan-y;outline-offset:4px}
+.villa-photo-cover>img{width:100%;height:auto;aspect-ratio:16/10;max-height:600px;object-fit:cover}
+.villa-photo-prev,.villa-photo-next{position:absolute;top:40%;width:44px;height:44px;border:0;border-radius:50%;background:#111d;color:#fff;font-size:30px;cursor:pointer}.villa-photo-prev{left:12px}.villa-photo-next{right:12px}
+.villa-photo-dots{display:flex;flex-wrap:wrap;justify-content:center;padding:4px}.villa-photo-dots button{width:32px;height:32px;display:grid;place-items:center;border:0;background:transparent;cursor:pointer}.villa-photo-dots span{width:6px;height:6px;border-radius:50%;background:#a3a3a3}.villa-photo-dots [aria-current=true] span{background:#111}.villa-photo-count{text-align:center;font-size:12px;margin:0 0 8px}.villa-public-media video{display:block;width:100%;max-height:600px;border-radius:12px}.villa-public-media figure{margin:12px 0}
+
+.merchant-cover:has(img[data-demo-image="true"])::after{left:8px;right:auto}
+
+/* Public approval ribbon belongs to the cover only; controls stay outside it. */
+.villa-photo-cover{position:relative;overflow:hidden;isolation:isolate}
+.card-image>.status-corner-ribbon,.discovery-villa-photo>.status-corner-ribbon{pointer-events:none}
+
+/* Compact mobile indicators; transparent targets stay at least 24 × 32px. */
+@media (max-width: 640px) {
+ .vc-banner { --hero-dot-size: 5px; --hero-dot-active-size: 7px; }
+ .vc-banner-controls { bottom:12px;gap:4px;max-width:calc(100% - 24px);padding:2px 6px;border-radius:20px; }
+ .vc-banner-dots { min-width:0;max-width:240px; }
+ .vc-banner-controls .vc-banner-dots button { flex:0 0 24px;width:24px;height:32px;min-height:32px; }
+ .vc-banner-controls .vc-banner-pause { flex:0 0 32px;width:32px;height:32px;min-height:32px; }
+ .vc-banner-dots button:focus:not(:focus-visible) { outline:none;box-shadow:none; }
+ .vc-banner-dots button:focus-visible { outline:2px solid #fff;outline-offset:1px;box-shadow:none; }
+}
+
+.merchant-otp-register { width:100%; min-height:48px; margin-top:18px; padding:12px 18px; }
+
+.merchant-registration-status { display:grid; gap:18px; line-height:1.8; }
+.merchant-registration-status :is(a,button) { min-height:48px; padding:12px 18px; text-align:center; text-decoration:none; }
+
+.merchant-existing-villas { margin-top:28px; }
+.portal-merchant .merchant-existing-villas .merchant-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr)); gap:16px; }
+.merchant-existing-villas .merchant-villa-compact { display:grid; grid-template-columns:80px minmax(0,1fr); gap:10px 14px; align-items:start; min-width:0; padding:16px; }
+.merchant-villa-compact .merchant-cover { grid-column:1; grid-row:1 / span 2; width:80px; margin:0; }
+.merchant-villa-compact .merchant-cover-link img { width:80px; height:80px; aspect-ratio:1; object-fit:cover; }
+.merchant-villa-compact .merchant-villa-top { grid-column:2; min-width:0; display:block; }
+.merchant-villa-compact .merchant-villa-top h2 { margin:4px 0 0; font-size:16px; line-height:1.4; overflow-wrap:anywhere; }
+.merchant-villa-compact .merchant-villa-top small { letter-spacing:0; }
+.merchant-villa-compact :is(.merchant-villa-meta,.merchant-reason,.status-corner-ribbon), .merchant-villa-compact .merchant-villa-top p { display:none; }
+.merchant-existing-status { grid-column:2; font-size:12px; line-height:1.5; }
+.merchant-villa-compact .button-row { grid-column:1 / -1; display:flex; gap:8px; margin-top:4px; }
+.merchant-villa-compact .button-row button { flex:1; min-width:0; min-height:40px; padding:8px 10px; font-size:12px; line-height:1.4; white-space:normal; }
+
+.merchant-registration-open { padding:14px 16px; background:#eaf7ef; color:#175a39; border-radius:14px; line-height:1.7; }
+.merchant-application-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.merchant-application-fields > :nth-child(n+3) { grid-column:1 / -1; }
+.merchant-application-fields .login-field { min-width:0; padding:16px 18px; border-radius:16px; }
+.merchant-application-fields .login-field textarea { border:0; outline:none; box-shadow:none; background:transparent; min-height:96px; resize:vertical; width:100%; }
+.merchant-application-upload { display:grid; gap:12px; padding:16px; border-radius:16px; background:#f4f5f7; }
+.merchant-application-upload input[type=file] { width:100%; max-width:100%; min-width:0; }
+.merchant-application-upload small,.merchant-application-summary p { line-height:1.8; }
+.merchant-application-consent { display:flex!important; align-items:flex-start; gap:12px; line-height:1.7; }
+.merchant-application-consent input[type=checkbox] { flex:0 0 18px; width:18px; height:18px; margin-top:5px; }
+.merchant-application-summary { overflow-wrap:anywhere; }
+.merchant-application-summary ul { padding-left:20px; }
+.admin-merchant-applications { display:grid; gap:18px; margin:24px 0; }
+@media(max-width:640px) { .merchant-application-fields { grid-template-columns:minmax(0,1fr); } .merchant-application-fields > * { grid-column:1!important; } .public-merchant-registration .button-row { flex-wrap:wrap; } }
+
+.merchant-application-fields .login-field,.admin-merchant-applications .login-field { display:flex; flex-direction:column; align-items:stretch; gap:8px; }
+.merchant-application-fields .login-field > span,.admin-merchant-applications .login-field > span { flex:none; width:auto; padding:0; border:0; display:block; line-height:1.6; }
+.merchant-application-fields .login-field input,.merchant-application-fields .login-field textarea { width:100%; min-width:0; padding:0; }
+
+.public-merchant-registration,.merchant-application-files { min-width:0; overflow-wrap:anywhere; }
+
+.merchant-application-upload.has-error { border:2px solid #b42318; background:#fff4f2; }
+.merchant-application-file-error,.merchant-application-error { color:#9b1c12; font-weight:600; line-height:1.6; overflow-wrap:anywhere; }
+.merchant-application-error { padding:12px 16px; border:1px solid #d92d20; border-radius:12px; background:#fff4f2; scroll-margin-block:100px; }
+.merchant-application-error:focus { outline:3px solid #b42318; outline-offset:3px; }
+
+/* Explicit foreground/background pairs prevent generic status colors from
+   making QR entitlement labels unreadable. Text remains the status indicator. */
+.subscription-status { font-size:14px; font-weight:700; line-height:1.5; border:1px solid currentColor; background:#e2e8f0; color:#334155; }
+.subscription-status.status-pending { background:#fff3cd; color:#664d03; }
+.subscription-status.status-active { background:#dcfce7; color:#14532d; }
+.subscription-status.status-expired { background:#ffedd5; color:#7c2d12; }
+.subscription-status.status-suspended { background:#fee2e2; color:#991b1b; }
+.subscription-status.status-inactive { background:#e2e8f0; color:#334155; }

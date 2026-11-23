@@ -1,0 +1,11 @@
+import {useEffect,useState} from 'react';
+import {api} from './api';
+import {useUiLanguage} from './uiLanguage';
+type Change={id:string;ownerId:string;targetKey:string;value:Record<string,unknown>};
+export default function AdminMerchantChanges(){
+ const {locale}=useUiLanguage(),en=locale==='en';const [rows,setRows]=useState<Change[]>([]),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+ const load=async()=>{const d=await api<{requests:Change[]}>('/admin/merchant-changes');setRows(d.requests)};
+ useEffect(()=>{void load().catch(()=>setError(en?'Unable to load change requests':'โหลดคำขอแก้ไขไม่สำเร็จ'))},[en]);
+ const decide=async(id:string,status:string)=>{setBusy(true);setError('');try{await api('/admin/merchant-changes/'+id,{status});await load()}catch{setError(en?'Unable to review. Reload and check the active profile.':'อนุมัติไม่สำเร็จ กรุณาโหลดและตรวจข้อมูลปัจจุบัน')}finally{setBusy(false)}};
+ return <section className="merchant-panel merchant-change-requests"><h2>{en?'Merchant changes awaiting approval':'คำขอแก้ไข Merchant รออนุมัติ'}</h2>{error&&<p role="alert">{error}</p>}<button onClick={()=>void load().catch(()=>setError(en?'Unable to load':'โหลดไม่สำเร็จ'))}>{en?'Reload':'โหลดใหม่'}</button>{rows.map(row=><article key={row.id}><h3>{row.ownerId}</h3><p>{row.targetKey.startsWith('merchant_receiving_bank:')?(en?'Receiving bank':'บัญชีรับเงิน'):(en?'Business profile':'ข้อมูลธุรกิจ')}</p><dl>{Object.entries((row.value.fields||row.value) as Record<string,unknown>).filter(([key])=>['businessName','businessNameEn','contactName','phone','address','bankName','accountName','accountNumber'].includes(key)).map(([key,value])=><div key={key}><dt>{({businessName:en?'Business name (Thai)':'ชื่อธุรกิจภาษาไทย',businessNameEn:en?'Business name (English)':'ชื่อธุรกิจภาษาอังกฤษ',contactName:en?'Contact name':'ชื่อผู้ติดต่อ',phone:en?'Phone':'เบอร์โทร',address:en?'Address':'ที่อยู่',bankName:en?'Bank':'ธนาคาร',accountName:en?'Account holder':'ชื่อบัญชี',accountNumber:en?'Account number':'เลขบัญชี'} as Record<string,string>)[key]}</dt><dd>{String(value)}</dd></div>)}</dl><button disabled={busy} onClick={()=>void decide(row.id,'approved')}>{en?'Approve':'อนุมัติ'}</button><button disabled={busy} onClick={()=>void decide(row.id,'rejected')}>{en?'Reject':'ไม่อนุมัติ'}</button></article>)}</section>
+}

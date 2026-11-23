@@ -1,0 +1,19 @@
+/* Fit content to its viewport while preserving intentional horizontal tracks.
+   Banner picture sources retain their CMS mobile assets. */
+.home-service-card, .home-service-body, .timeline-head > *, .home-feature-copy { min-width: 0; }
+.home-service-body h3, .home-service-body p, .home-feature-copy, .timeline-head { overflow-wrap: anywhere; }
+.timeline-head { gap: 24px; }
+.footer-brand .logo > span:last-child { max-width: none; }
+@media (max-width: 900px) {
+  .home-feature-layout { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .home-feature-merchant .home-feature-image, .home-feature-merchant .home-feature-copy { grid-column: auto; grid-row: auto; }
+  .timeline-head { flex-direction: column; align-items: flex-start; }
+  .timeline-head > p { text-align: left; }
+}
+@media (max-width: 360px) {
+  .nav-actions { flex-wrap: wrap; justify-content: flex-end; max-width: 100%; min-width: 0; }
+  .nav-actions > * { max-width: 100%; }
+}
+
+/* Explicit width keeps the aspect-ratio/min-height combination within tablet viewports. */
+.vc-banner { width: 100%; max-width: 100%; min-width: 0; }

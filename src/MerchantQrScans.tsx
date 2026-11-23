@@ -1,0 +1,15 @@
+import {useState} from 'react';
+import {useUiLanguage} from './uiLanguage';
+import type {MerchantVilla} from './merchantStore';
+import type {Page} from './prototype';
+export default function MerchantQrScans({villas,go,onRefresh}:{villas:MerchantVilla[];go:(page:Page,id?:string)=>void;onRefresh:()=>Promise<void>}){
+ const {locale}=useUiLanguage(),en=locale==='en',[busy,setBusy]=useState(false),[error,setError]=useState(false),available=villas.every(v=>v.qrScans!==undefined);
+ const refresh=async()=>{setBusy(true);setError(false);try{await onRefresh()}catch{setError(true)}finally{setBusy(false)}};
+ const total=villas.reduce((n,v)=>n+(v.qrScans?.total||0),0),recent=villas.reduce((n,v)=>n+(v.qrScans?.last30Days||0),0),format=(n:number)=>n.toLocaleString(en?'en-GB':'th-TH');
+ return <section className="merchant-panel merchant-qr-scans" aria-labelledby="merchant-qr-scans-title">
+ <div className="merchant-overview-heading"><div><h2 id="merchant-qr-scans-title">{en?'QR scans and opens':'จำนวนสแกนและเปิด QR'}</h2><p>{en?'Recorded QR scan/link-open events, including repeat visits. These are not unique visitors.':'จำนวนครั้งที่ระบบบันทึกการสแกนหรือเปิดลิงก์ QR รวมการเปิดซ้ำ ไม่ใช่จำนวนคนไม่ซ้ำ'}</p></div><button className="outline-button" disabled={busy} onClick={()=>void refresh()}>{busy?(en?'Refreshing…':'กำลังอัปเดต…'):(en?'Refresh counts':'อัปเดตจำนวนครั้ง')}</button></div>
+ {error||!available?<p role="alert">{en?'Unable to load counts. Please retry.':'โหลดจำนวนครั้งไม่สำเร็จ กรุณาลองอีกครั้ง'}</p>:<><div className="metric-grid"><div className="metric-card"><span>{en?'All recorded events':'สะสมที่มีบันทึก'}</span><strong data-qr-total>{format(total)}</strong><small>{en?'All properties in this account':'รวมทุกที่พักในบัญชี'}</small></div><div className="metric-card"><span>{en?'Last 30 days':'30 วันที่ผ่านมา'}</span><strong data-qr-recent>{format(recent)}</strong><small>{en?'QR scan/link-open events':'ครั้งที่สแกนหรือเปิดลิงก์ QR'}</small></div></div>
+ {!villas.length?<p>{en?'No properties yet.':'ยังไม่มีที่พักในบัญชี'}</p>:<details className="merchant-qr-count-details"><summary>{en?`View counts by property (${villas.length})`:`ดูจำนวนครั้งแยกตามที่พัก (${villas.length})`}</summary><div className="merchant-qr-count-list">{villas.map(v=><div className="merchant-qr-count-row" key={v.id} data-qr-count-villa={v.id}><button className="text-button" onClick={()=>go('owner-villa-detail',v.id)}>{en&&v.nameEn?v.nameEn:v.name}{v.archived?' (Archived)':''}</button><span>{en?'Total':'สะสม'} <strong data-qr-property-total>{format(v.qrScans!.total)}</strong> {en?'times':'ครั้ง'} · {en?'30 days':'30 วัน'} <strong data-qr-property-recent>{format(v.qrScans!.last30Days)}</strong> {en?'times':'ครั้ง'}</span></div>)}</div></details>}
+ <p className="portal-note">{en?'Owner/Admin previews are excluded. Visits without a recorded event cannot be reconstructed retrospectively.':'ไม่นับการเปิดตรวจของเจ้าของที่พักและ Admin ไม่สามารถนับย้อนหลังในช่วงที่ไม่มีการบันทึกเหตุการณ์ได้'}</p></>}
+ </section>;
+}
