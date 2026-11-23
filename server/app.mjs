@@ -1,3 +1,4 @@
+import {phase2PublicAdvertisements} from './phase2-public-advertisements.mjs';
 import {assertPhase2VillaEditing,phase2VillaAccess} from './phase2-access.mjs';
 import {businessPermissions,permissionForRequest,requireBusinessPermission,withPermissionContext,requestCorrelation} from './business-permissions.mjs';
 import {decisionAudit} from './decision-audit.mjs';
@@ -614,7 +615,11 @@ export function createApp(db, config, transport) {
         const file=await propertyMediaFile(db,mediaFile[1],viewer,membershipTrustOptions)
         return await sendPropertyFile(file,req,res)
       }
-      if(path === "/api/public/advertisements" && req.method === "GET") return json(phase1?{advertisements:[],deferred:true}:await advertisingApi(db,null,req,path,url,body));
+      if(path === "/api/public/advertisements" && req.method === "GET") {
+        const legacy=phase1?{advertisements:[],deferred:true}:await advertisingApi(db,null,req,path,url,body);
+        const phase2=await phase2PublicAdvertisements(db,url,config);
+        return json({...legacy,advertisements:[...legacy.advertisements,...phase2],...(phase2.length?{deferred:false}:{})});
+      }
       if(path === "/api/public/reviews" && req.method === "GET") return json(await reviewsApi(db,null,req,path,url,body,config));
       const reviewFile = path.match(/^\/api\/public\/review-media\/([a-f0-9-]{36})$/)
       if(reviewFile&&["GET","HEAD"].includes(req.method)){

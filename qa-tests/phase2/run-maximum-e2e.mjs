@@ -16,6 +16,6 @@ try{
  if(process.env.UI_BUILD_DIR)env.UI_BUILD_DIR=process.env.UI_BUILD_DIR;
  env.MAXIMUM_EVIDENCE_DIR=process.env.MAXIMUM_EVIDENCE_DIR;env.MAXIMUM_PRODUCTION_PROFILE=process.argv.includes('--production-profile')?'1':'0';
  const run=args=>new Promise((resolve,reject)=>{const child=spawn(process.execPath,args,{env,stdio:'inherit'});child.once('exit',c=>resolve(c??1));child.once('error',reject);});
- code=await run(process.argv.includes('--review-api')?['--test','qa-tests/phase2/public-review-bridge.test.mjs']:[process.argv.includes('--review-browser')?'qa-tests/phase2/public-review-bridge-browser.mjs':process.argv.includes('--cms')?'qa-tests/phase2/maximum-cms.mjs':'qa-tests/phase2/maximum-e2e.mjs']);
+ code=await run(process.argv.includes('--banner-api')?['--test','qa-tests/phase2/main-banner-bridge.test.mjs']:process.argv.includes('--banner-browser')?['qa-tests/phase2/main-banner-native.mjs']:process.argv.includes('--review-api')?['--test','qa-tests/phase2/public-review-bridge.test.mjs']:[process.argv.includes('--review-browser')?'qa-tests/phase2/public-review-bridge-browser.mjs':process.argv.includes('--cms')?'qa-tests/phase2/maximum-cms.mjs':'qa-tests/phase2/maximum-e2e.mjs']);
 }finally{await pg.stop().catch(()=>{});rmSync(dir,{recursive:true,force:true});}
 process.exit(Number(code));

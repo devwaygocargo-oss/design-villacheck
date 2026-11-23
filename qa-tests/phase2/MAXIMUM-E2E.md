@@ -24,3 +24,10 @@ MAXIMUM_EVIDENCE_DIR=/absolute/private/evidence node qa-tests/phase2/run-maximum
 node --test qa-tests/phase2/operational-review-guards.test.mjs
 
 The profile uses an explicit trusted database-identity facade, following existing production-core contract tests; the connector remains loopback and no Neon/Production connection is opened. It checks enabled operational review workflows and disabled-operation/policy controls, media capture independent of review policy, and financial UI closure. A separate strictPHASE1_PUBLIC/Production-runtime API contract test preserves legacy disabled state while projecting only business-approved Phase2 public records. These vectors are not actual Production acceptance or provider TEST. Legacy/Phase2 duplicate checks share existing PostgreSQL transaction serialization; concurrent submissions create one record and return409 for the other. Historical records are not rewritten or deleted.
+
+Actual Homepage banner and company social-tracking journeys:
+
+MAXIMUM_EVIDENCE_DIR=/absolute/private/evidence node qa-tests/phase2/run-maximum-e2e.mjs --banner-api
+MAXIMUM_EVIDENCE_DIR=/absolute/private/evidence node qa-tests/phase2/run-maximum-e2e.mjs --banner-browser
+
+The API case checks the actual publicadvertisements endpoint, TrialTEAM versus PACKAGE entitlement, future/unapproved/exactexpiry, suspendedparent and existingDemo filters. NativeDesktop/Mobile ordinaryAdmin activates syntheticTrial, schedules a company-selected banner, and freshguest sees the actualHome slide and sameQR link. Admin records a SYNTHETIC Facebook URL and ownMerchant sees it; foreignMerchant does not. No real Facebook post is created or verified. Slot/rotation/publication values are synthetic test inputs, not companypolicy signoff. PhysicalDB remains loopback with explicitcoreflag identityfacade. Existing Staging Demo rules/assets are retained; Staging is not accessed.
