@@ -1,4 +1,17 @@
 {
-  "game": {"id":"a25b9dae-282f-4a92-b1f3-ff1a824bd4bc","email":"gamefz.fzz@gmail.com"},
-  "prin": {"id":"1c9a3168-8414-4f63-bcb8-27344bd1ed21","email":"pk.waritt@gmail.com"}
+  "game": {
+    "id": "a25b9dae-282f-4a92-b1f3-ff1a824bd4bc",
+    "email": "gamefz.fzz@gmail.com",
+    "primaryRole": "admin"
+  },
+  "prin": {
+    "id": "1c9a3168-8414-4f63-bcb8-27344bd1ed21",
+    "email": "pk.waritt@gmail.com",
+    "primaryRole": "admin"
+  },
+  "dew": {
+    "id": "4556c5bf-0999-44fb-9494-3c29686aad1d",
+    "email": "dew.msit06@gmail.com",
+    "primaryRole": "user"
+  }
 }

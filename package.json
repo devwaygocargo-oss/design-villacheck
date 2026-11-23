@@ -26,7 +26,9 @@
     "check:health": "node tools/health-check.mjs",
     "demo:seed-public": "node tools/seed-public-demo.mjs",
     "test:phase2": "node qa-tests/phase2/run-consolidated.mjs && node qa-tests/phase2/run-consolidated-browser.mjs",
-    "check:phase2-config": "node tools/phase2-preflight.mjs"
+    "check:phase2-config": "node tools/phase2-preflight.mjs",
+    "test:production-owners": "node qa-tests/phase2/run-production-owner-three.mjs",
+    "test:production-owners:browser": "node qa-tests/phase2/run-production-owner-three-browser.mjs"
   },
   "dependencies": {
     "@nestjs/common": "^12.1.2",

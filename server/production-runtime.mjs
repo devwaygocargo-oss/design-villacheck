@@ -88,6 +88,7 @@ export function productionReleaseMode(env){const mode=env.PRODUCTION_RELEASE_MOD
 export function productionRequestAllowed(method,path,mode='PRELAUNCH',policy={}){
  if(method==='HEAD')method='GET';
  if(path.startsWith('/api/phase2/'))return policy.phase2ProductionCoreOnly===true&&phase2ProductionReadAllowed(method,path,policy);
+ if(policy.phase2ProductionOperationalManagement===true&&['GET','POST','PATCH'].includes(method)&&/^\/api\/admin\/(?:receiving-bank|change-approvals|packages|package-entitlements|settings|access-roles|role|roles|permissions|cms|accounts|users|merchants|merchant-registrations|registration-documents|owner-verification|ownership-documents|bank-evidence|registry-bank-verification|reports|tickets|checks|leads|audit-log|reviews|advertisements|social-jobs|social-materials|privacy-requests|owner-notifications|documents|review-sample-document|villa-archive|villa-pages|merchant-changes|property-media|media-upload|qr|qr-verification|readiness|acceptance|subscriptions)(?:\/|$)/.test(path))return true; // Authentication, granular permission, CSRF and handler validation still required.
  if(mode==='PHASE1_PUBLIC')return publicPhase1RequestAllowed(method,path,policy);
  if(['/api/auth/admin-password/request','/api/auth/admin-password/complete','/api/admin/password-invitation'].includes(path))return method==='POST'&&policy.adminPasswordSetupEnabled===true;
  if(mode==='PHASE1'&&reviewRequestAllowed(method,path))return true;

@@ -14,6 +14,6 @@ try{
  const env={PATH:process.env.PATH,HOME:process.env.HOME,TMPDIR:process.env.TMPDIR,APP_ENV:'test',TEST_DATABASE_URL:`postgresql://postgres:${password}@127.0.0.1:${port}/postgres`,NEXT_TELEMETRY_DISABLED:'1',SEED_PUBLIC_DEMO_DATA:'false',SEED_DEMO_ACCOUNTS:'false'};
  for(const key of ['DATABASE_URL','DIRECT_URL','VillaCheck_DATABASE_URL','SMTP_HOST','SMTP_FROM','SMTP_USER','SMTP_PASSWORD','SMTP_PORT','SMTP_SECURE','OTP_SECRET','GOOGLE_CLIENT_ID','GOOGLE_CLIENT_SECRET','LINE_CHANNEL_ID','LINE_CHANNEL_SECRET','FACEBOOK_APP_ID','FACEBOOK_APP_SECRET','THAIBULKSMS_API_KEY','THAIBULKSMS_API_SECRET','THAIBULKSMS_SENDER','THAIBULKSMS_OTP_KEY','THAIBULKSMS_OTP_SECRET','OMISE_TEST_SECRET_KEY','OMISE_TEST_PUBLIC_KEY','CRON_SECRET'])env[key]='';
  const run=args=>new Promise((resolve,reject)=>{const child=spawn(process.execPath,args,{env,stdio:'inherit'});child.once('exit',c=>resolve(c??1));child.once('error',reject);});
- code=await run(['--test','qa-tests/phase2/consolidated-business.test.mjs','qa-tests/phase2/business-permissions.test.mjs']);
+ code=await run(['--test','qa-tests/phase2/consolidated-business.test.mjs','qa-tests/phase2/business-permissions.test.mjs','qa-tests/phase2/production-owner-three.test.mjs']);
 }finally{await pg.stop().catch(()=>{});rmSync(dir,{recursive:true,force:true});}
 process.exit(Number(code));

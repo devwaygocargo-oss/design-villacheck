@@ -214,6 +214,10 @@ const patterns=[
     "flags": ""
   },
   {
+    "pattern": "^\\/api\\/admin\\/(?:receiving-bank|change-approvals|packages|package-entitlements|settings|access-roles|role|roles|permissions|cms|accounts|users|merchants|merchant-registrations|registration-documents|owner-verification|ownership-documents|bank-evidence|registry-bank-verification|reports|tickets|checks|leads|audit-log|reviews|advertisements|social-jobs|social-materials|privacy-requests|owner-notifications|documents|review-sample-document|villa-archive|villa-pages|merchant-changes|property-media|media-upload|qr|qr-verification|readiness|acceptance|subscriptions)(?:\\/|$)",
+    "flags": ""
+  },
+  {
     "pattern": "^\\/api\\/admin\\/(access-roles|role|roles|permissions)(?:\\/|$)",
     "flags": ""
   },
