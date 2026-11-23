@@ -1,4 +1,4 @@
-import {phase2ProductionReadAllowed} from './phase2-production.mjs';
+import {phase2ProductionPolicy,phase2ProductionReadAllowed} from './phase2-production.mjs';
 import {phase2Environment} from './phase2-environment.mjs';
 import {publicPhase1Policy,publicPhase1RequestAllowed} from './public-phase1-release.mjs';
 import {adminPasswordSetupRuntimePolicy} from './admin-password-policy.mjs';
@@ -47,7 +47,7 @@ export function productionRuntimePolicy(env,{allowLegacyEnvironment=false}={}) {
  const publicPhase1=publicPhase1Policy(env);if(publicPhase1)return {...publicPhase1,...otpPolicy,...adminSetupPolicy,unifiedAuthEnabled:publicPhase1.unifiedAuthEnabled};
  if(mode==='PRODUCTION'){
   if(env.BUSINESS_INITIALIZATION_MODE!=='EXISTING_CATALOG')reject();
-  return {prelaunch:false,phase1:false,releaseMode:mode,businessInitializationDisabled:false,...otpPolicy,...propertyPolicy,...adminSetupPolicy};
+  return {...phase2ProductionPolicy(env),prelaunch:false,phase1:false,releaseMode:mode,businessInitializationDisabled:false,...otpPolicy,...propertyPolicy,...adminSetupPolicy};
  }
  if(mode==='MEMBER_PREVIEW'||mode==='PRELAUNCH'&&(env.BUSINESS_INITIALIZATION_MODE!==undefined||env.OTP_DELIVERY_MODE!==undefined)){
   if(env.BUSINESS_INITIALIZATION_MODE!=='DISABLED_UNTIL_APPROVAL'||env.OTP_DELIVERY_MODE!=='DISABLED')reject()
