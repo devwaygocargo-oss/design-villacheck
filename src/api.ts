@@ -1,6 +1,6 @@
 import {getLocale,translateUi} from "./uiLanguage"
 import type { Account } from "./merchantStore"
-const adminPortal = () => typeof window !== "undefined" && (/^\/admin(?:\/|$)/.test(window.location.pathname)||window.location.pathname==="/owner/login"||(window.location.pathname==="/owner"&&new URLSearchParams(window.location.search).get("context")==="admin"))
+const adminPortal = () => typeof window !== "undefined" && (/^\/admin(?:\/|$)/.test(window.location.pathname)||window.location.pathname==="/owner/login"||window.location.pathname==="/owner")
 const merchantPortal=()=>typeof window!=="undefined"&&(window.location.pathname==="/merchant"||/^owner-/.test(new URLSearchParams(window.location.hash.slice(1)).get("page")||"")&&!["owner-auth","owner-registration"].includes(new URLSearchParams(window.location.hash.slice(1)).get("page")||""));
 const projectAccount=(account:Account,inMerchantPortal=merchantPortal()):Account=>{if(account.role==="admin"||!account.unifiedAuthEnabled&&!(account.primaryRole==="user"&&account.capabilities?.merchant))return account;const primary=account.primaryRole||account.role;return{...account,primaryRole:primary,role:inMerchantPortal&&account.capabilities?.merchant?"merchant":"user"};};
 let csrf = ""
